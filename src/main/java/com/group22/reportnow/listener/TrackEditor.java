@@ -1,3 +1,4 @@
+//https://www.bluej.org/doc/extensionsAPI2/bluej/extensions2/editor/JavaEditor.html
 package com.group22.reportnow.listener;
 
 import java.util.IdentityHashMap;
@@ -15,12 +16,12 @@ import bluej.extensions2.editor.JavaEditor;
 import bluej.extensions2.event.PackageEvent;
 import bluej.extensions2.event.PackageListener;
 
-public class WatchEditor implements PackageListener {
+public class TrackEditor implements PackageListener {
     private final BlueJ bluej;
     private final SessionData data;
-    private final Map<JavaEditor, WatchDocument> attached = new IdentityHashMap<>();
+    private final Map<JavaEditor, TrackDocumentEdits> attached = new IdentityHashMap<>();
 
-    public WatchEditor(BlueJ bluej, SessionData data) {
+    public TrackEditor(BlueJ bluej, SessionData data) {
         this.bluej = bluej;
         this.data = data;
     }
@@ -41,7 +42,7 @@ public class WatchEditor implements PackageListener {
                     for (BClass cls : pkg.getClasses()) {
                         JavaEditor editor = cls.getJavaEditorIfOpen();
                         if (editor != null && !attached.containsKey(editor)) {
-                            attached.put(editor, new WatchDocument(editor, data));
+                            attached.put(editor, new TrackDocumentEdits(editor, data));
                         }
                     }
                 }
@@ -52,7 +53,7 @@ public class WatchEditor implements PackageListener {
     }
 
     public void detachAll() {
-        for (WatchDocument watcher : attached.values()) {
+        for (TrackDocumentEdits watcher : attached.values()) {
             watcher.detach();
         }
         attached.clear();

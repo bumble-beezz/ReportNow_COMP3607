@@ -12,14 +12,14 @@ import com.group22.reportnow.storage.SessionData;
 
 import bluej.extensions2.event.InvocationFinishedEvent;
 
-public class RecordRunTest {
+public class ExecutionListenerTest {
     private SessionData data;
-    private RecordRun recorder;
+    private ExecutionListener recorder;
 
     @BeforeEach
     void setUp() {
         data = new SessionData();
-        recorder = new RecordRun(data);
+        recorder = new ExecutionListener(data);
     }
 
     private InvocationFinishedEvent event(InvocationFinishedEvent.EventType type) {

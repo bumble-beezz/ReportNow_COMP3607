@@ -5,11 +5,11 @@ import com.group22.reportnow.storage.SessionData;
 import bluej.extensions2.event.InvocationFinishedEvent;
 import bluej.extensions2.event.InvocationFinishedListener;
 
-public class RecordRun implements InvocationFinishedListener {
+public class ExecutionListener implements InvocationFinishedListener {
     private final SessionData data;
     private long startTimeMs = System.currentTimeMillis();
 
-    public RecordRun(SessionData data) {
+    public ExecutionListener(SessionData data) {
         this.data = data;
     }
 

@@ -1,3 +1,4 @@
+//https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/Duration.html
 package com.group22.reportnow.storage;
 
 import java.time.Duration;
@@ -49,6 +50,27 @@ public class SessionData {
 
     public synchronized void recordEdit(Instant when) {
         editTimes.add(when);
+    }
+
+    public synchronized long getTypingCadence(){
+        if (editTimes.size() < 2) {
+            return 0;
+        }
+
+        long total = 0;
+        for (int i = 1; i < editTimes.size(); i++) {
+        long gap = Duration.between(editTimes.get(i - 1), editTimes.get(i)).toMillis();
+        total += gap;
+        }
+        return total / (editTimes.size() - 1);
+    }
+
+    public synchronized double getEditsPerMinute(){
+        double minutes = getSessionDurationMs() / 60000.0;
+        if (minutes <= 0) {
+            return 0;
+        }
+        return editTimes.size() / minutes;
     }
 
     public synchronized void endSession() {

@@ -1,3 +1,8 @@
+//https://bluej.org/doc/extensionsAPI2/bluej/extensions2/BlueJ.html
+//https://www.bluej.org/doc/extensionsAPI2/bluej/extensions2/BClass.html
+//https://www.baeldung.com/java-threadlocal
+//https://www.bluej.org/doc/extensionsAPI2/bluej/extensions2/event/PackageListener.html
+//https://www.baeldung.com/java-concurrent-map
 package com.group22.reportnow.listener;
 
 import java.io.File;
