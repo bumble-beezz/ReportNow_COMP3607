@@ -2,6 +2,7 @@ package com.group22.reportnow.listener;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,7 +13,8 @@ import com.group22.reportnow.storage.SessionData;
 
 import bluej.extensions2.event.InvocationFinishedEvent;
 
-public class ExecutionListenerTest {
+class ExecutionListenerTest {
+
     private SessionData data;
     private ExecutionListener recorder;
 
@@ -29,16 +31,17 @@ public class ExecutionListenerTest {
     }
 
     @Test
-    void normalExitIsSuccess() {
+    void normalExitIsRecordedAsSuccess() {
         recorder.invocationFinished(event(InvocationFinishedEvent.EventType.NORMAL_EXIT));
 
         assertEquals(1, data.getRunEvents().size());
         assertTrue(data.getRunEvents().get(0).isSuccess());
-        assertEquals(null, data.getRunEvents().get(0).getMessage());
+        assertNull(data.getRunEvents().get(0).getMessage());
+        assertEquals(0L, data.getRunEvents().get(0).getDurationMs());
     }
 
     @Test
-    void exceptionExitIsFailure() {
+    void exceptionExitIsRecordedAsFailure() {
         recorder.invocationFinished(event(InvocationFinishedEvent.EventType.EXCEPTION_EXIT));
 
         assertEquals(1, data.getRunEvents().size());
@@ -47,17 +50,19 @@ public class ExecutionListenerTest {
     }
 
     @Test
-    void terminatedExitIsFailure() {
+    void terminatedExitIsRecordedAsFailure() {
         recorder.invocationFinished(event(InvocationFinishedEvent.EventType.TERMINATED_EXIT));
 
+        assertEquals(1, data.getRunEvents().size());
         assertFalse(data.getRunEvents().get(0).isSuccess());
         assertEquals("TERMINATED_EXIT", data.getRunEvents().get(0).getMessage());
     }
 
     @Test
-    void unknownExitIsFailure() {
+    void unknownExitIsRecordedAsFailure() {
         recorder.invocationFinished(event(InvocationFinishedEvent.EventType.UNKNOWN_EXIT));
 
+        assertEquals(1, data.getRunEvents().size());
         assertFalse(data.getRunEvents().get(0).isSuccess());
         assertEquals("UNKNOWN_EXIT", data.getRunEvents().get(0).getMessage());
     }

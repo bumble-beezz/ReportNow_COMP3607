@@ -7,6 +7,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,6 +29,7 @@ class SessionDataTest {
         assertEquals(0, data.getCompileEvents().size());
         assertEquals(0, data.getRunEvents().size());
     }
+
     @Test
     void recordsCompileEvents() {
         data.recordCompile("P", true, 100, new ArrayList<>());
@@ -37,6 +39,7 @@ class SessionDataTest {
         assertEquals(1, data.getSuccessfulCompileCount());
         assertEquals(1, data.getFailedCompileCount());
     }
+
     @Test
     void recordsRunEvents() {
         data.recordRun("P", true, 50, null);
@@ -52,6 +55,7 @@ class SessionDataTest {
         data.recordRun("P", true, 50, null);
         assertEquals(150, data.getActiveTimeMs());
     }
+
     @Test
     void idleTimeIsClampedToZero() {
         data.recordCompile("P", true, 10_000, new ArrayList<>());
@@ -75,8 +79,67 @@ class SessionDataTest {
         data.recordProject("ProjectOpened", "Beta");
         assertEquals("Beta", data.getCurrentProjectName());
     }
+
     @Test
     void defaultProjectNameWhenNoProjectEvents() {
         assertEquals("UnknownProject", data.getCurrentProjectName());
+    }
+
+    // ---- getTypingCadence() ----
+
+    @Test
+    void typingCadenceIsZeroWithNoEdits() {
+        assertEquals(0L, data.getTypingCadence());
+    }
+
+    @Test
+    void typingCadenceIsZeroWithOneEdit() {
+        data.recordEdit(Instant.now());
+        assertEquals(0L, data.getTypingCadence());
+    }
+
+    @Test
+    void typingCadenceAveragesFastGaps() {
+        long base = System.currentTimeMillis();
+        data.recordEdit(Instant.ofEpochMilli(base));
+        data.recordEdit(Instant.ofEpochMilli(base + 1_000));
+        data.recordEdit(Instant.ofEpochMilli(base + 3_000));
+        // Gaps: 1000 ms and 2000 ms -> average 1500 ms
+        assertEquals(1_500L, data.getTypingCadence());
+    }
+
+    @Test
+    void typingCadenceExcludesSlowGaps() {
+        long base = System.currentTimeMillis();
+        data.recordEdit(Instant.ofEpochMilli(base));
+        data.recordEdit(Instant.ofEpochMilli(base + 200_000)); // 200 s, excluded
+        data.recordEdit(Instant.ofEpochMilli(base + 201_000)); // 1 s, included
+        // Only the 1000 ms gap is used
+        assertEquals(1_000L, data.getTypingCadence());
+    }
+
+    // ---- getEditsPerMinute() ----
+
+    @Test
+    void editsPerMinuteIsZeroWithNoEdits() {
+        data.endSession();
+        assertEquals(0.0, data.getEditsPerMinute(), 0.001);
+    }
+
+    @Test
+    void editsPerMinuteIsPositiveWithEditsAndDuration() throws InterruptedException {
+        data.recordEdit(Instant.now());
+        Thread.sleep(40);
+        data.endSession();
+        assertTrue(data.getEditsPerMinute() > 0);
+    }
+
+    @Test
+    void editsPerMinuteIsZeroWhenSessionHasNoDuration() {
+        // endSession called without any recorded time -> duration may be 0
+        SessionData fresh = new SessionData();
+        fresh.endSession();
+        // Either 0 ms or a very small value; the edit count is 0 so result is 0
+        assertEquals(0.0, fresh.getEditsPerMinute(), 0.001);
     }
 }

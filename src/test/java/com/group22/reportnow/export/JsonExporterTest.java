@@ -2,6 +2,7 @@ package com.group22.reportnow.export;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +49,11 @@ class JsonExporterTest {
         assertEquals(1, meta.get("failed_compilations").asInt());
         assertEquals(1, meta.get("total_execution_attempts").asInt());
 
+        // Fields added by the newer SessionData API
+        assertTrue(meta.has("typing_cadence_ms"));
+        assertTrue(meta.has("edits_per_minute"));
+        assertEquals(0L, meta.get("typing_cadence_ms").asLong());
+
         JsonNode events = root.get("events");
         assertNotNull(events);
         assertEquals(3, events.size());
@@ -83,6 +89,23 @@ class JsonExporterTest {
         assertEquals("EXECUTION", run.get("event_type").asText());
         assertTrue(!run.get("success").asBoolean());
         assertEquals("NullPointerException", run.get("message").asText());
+    }
+
+    @Test
+    void typingCadenceIsReflectedInMetadata() throws Exception {
+        SessionData data = new SessionData();
+        long base = System.currentTimeMillis();
+        data.recordEdit(Instant.ofEpochMilli(base));
+        data.recordEdit(Instant.ofEpochMilli(base + 1_000));
+        data.recordEdit(Instant.ofEpochMilli(base + 3_000));
+        data.endSession();
+
+        File out = tempDir.resolve("cadence.json").toFile();
+        new JsonExporter("S", "P").export(data, out);
+
+        JsonNode meta = new ObjectMapper().readTree(out).get("session_metadata");
+        assertEquals(1_500L, meta.get("typing_cadence_ms").asLong());
+        assertTrue(meta.get("edits_per_minute").isNumber());
     }
 
     @Test

@@ -3,6 +3,7 @@ package com.group22.reportnow.export;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,6 +62,48 @@ class PdfExporterTest {
         data.setPastSessions(past);
 
         File out = tempDir.resolve("past.pdf").toFile();
+        assertDoesNotThrow(() -> new PdfExporter("S", "P").export(data, out));
+        assertTrue(out.length() > 0);
+    }
+
+    @Test
+    void pdfWithTypingCadenceDataWorks() {
+        SessionData data = new SessionData();
+        long base = System.currentTimeMillis();
+        data.recordEdit(Instant.ofEpochMilli(base));
+        data.recordEdit(Instant.ofEpochMilli(base + 1_000));
+        data.recordEdit(Instant.ofEpochMilli(base + 3_000));
+        data.recordCompile("P", true, 100, new ArrayList<>());
+        data.endSession();
+
+        File out = tempDir.resolve("cadence.pdf").toFile();
+        assertDoesNotThrow(() -> new PdfExporter("S", "P").export(data, out));
+        assertTrue(out.length() > 0);
+    }
+
+    @Test
+    void pdfFiltersOtherProjects() {
+        SessionData data = new SessionData();
+        data.recordCompile("OtherProject", true, 100, new ArrayList<>());
+        data.recordCompile("P", true, 100, new ArrayList<>());
+        data.recordRun("OtherProject", false, 50, "boom");
+        data.endSession();
+
+        File out = tempDir.resolve("filtered.pdf").toFile();
+        assertDoesNotThrow(() -> new PdfExporter("S", "P").export(data, out));
+        assertTrue(out.length() > 0);
+    }
+
+    @Test
+    void pdfWithManyErrorsStillWorks() {
+        SessionData data = new SessionData();
+        for (int i = 0; i < 20; i++) {
+            data.recordCompile("P", false, 10,
+                    List.of(new CompileError("A.java", i, "ERROR", "boom " + i)));
+        }
+        data.endSession();
+
+        File out = tempDir.resolve("many.pdf").toFile();
         assertDoesNotThrow(() -> new PdfExporter("S", "P").export(data, out));
         assertTrue(out.length() > 0);
     }
