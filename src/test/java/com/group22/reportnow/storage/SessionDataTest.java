@@ -33,8 +33,7 @@ class SessionDataTest {
     @Test
     void recordsCompileEvents() {
         data.recordCompile("P", true, 100, new ArrayList<>());
-        data.recordCompile("P", false, 200,
-                List.of(new CompileError("A.java", 1, "ERROR", "boom")));
+        data.recordCompile("P", false, 200, List.of(new CompileError("A.java", 1, "ERROR", "boom")));
         assertEquals(2, data.getCompileEvents().size());
         assertEquals(1, data.getSuccessfulCompileCount());
         assertEquals(1, data.getFailedCompileCount());
@@ -85,8 +84,6 @@ class SessionDataTest {
         assertEquals("UnknownProject", data.getCurrentProjectName());
     }
 
-    // ---- getTypingCadence() ----
-
     @Test
     void typingCadenceIsZeroWithNoEdits() {
         assertEquals(0L, data.getTypingCadence());
@@ -104,7 +101,6 @@ class SessionDataTest {
         data.recordEdit(Instant.ofEpochMilli(base));
         data.recordEdit(Instant.ofEpochMilli(base + 1_000));
         data.recordEdit(Instant.ofEpochMilli(base + 3_000));
-        // Gaps: 1000 ms and 2000 ms -> average 1500 ms
         assertEquals(1_500L, data.getTypingCadence());
     }
 
@@ -112,13 +108,11 @@ class SessionDataTest {
     void typingCadenceExcludesSlowGaps() {
         long base = System.currentTimeMillis();
         data.recordEdit(Instant.ofEpochMilli(base));
-        data.recordEdit(Instant.ofEpochMilli(base + 200_000)); // 200 s, excluded
-        data.recordEdit(Instant.ofEpochMilli(base + 201_000)); // 1 s, included
-        // Only the 1000 ms gap is used
+        data.recordEdit(Instant.ofEpochMilli(base + 200_000));
+        data.recordEdit(Instant.ofEpochMilli(base + 201_000)); 
         assertEquals(1_000L, data.getTypingCadence());
     }
 
-    // ---- getEditsPerMinute() ----
 
     @Test
     void editsPerMinuteIsZeroWithNoEdits() {
@@ -136,10 +130,8 @@ class SessionDataTest {
 
     @Test
     void editsPerMinuteIsZeroWhenSessionHasNoDuration() {
-        // endSession called without any recorded time -> duration may be 0
         SessionData fresh = new SessionData();
         fresh.endSession();
-        // Either 0 ms or a very small value; the edit count is 0 so result is 0
         assertEquals(0.0, fresh.getEditsPerMinute(), 0.001);
     }
 }

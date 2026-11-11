@@ -23,7 +23,7 @@ class TrackEditorTest {
 
     @BeforeEach
     void setUp() {
-        bluej = mock(BlueJ.class);
+        bluej= mock(BlueJ.class);
         data = mock(SessionData.class);
         tracker = new TrackEditor(bluej, data);
     }
@@ -57,8 +57,8 @@ class TrackEditorTest {
     @Test
     void scanHandlesClassWithNoOpenEditor() throws Exception {
         BProject project = mock(BProject.class);
-        BPackage pkg = mock(BPackage.class);
-        BClass cls = mock(BClass.class);
+        BPackage pkg= mock(BPackage.class);
+        BClass cls= mock(BClass.class);
         when(cls.getJavaEditorIfOpen()).thenReturn(null);
         when(pkg.getClasses()).thenReturn(new BClass[]{cls});
         when(project.getPackages()).thenReturn(new BPackage[]{pkg});
@@ -80,7 +80,6 @@ class TrackEditorTest {
         when(bluej.getOpenProjects()).thenReturn(new BProject[]{project});
 
         assertDoesNotThrow(() -> tracker.scanOpenEditors());
-        // Running the scan twice must not attach the same editor twice
         assertDoesNotThrow(() -> tracker.scanOpenEditors());
     }
 

@@ -25,7 +25,7 @@ class ExecutionListenerTest {
     }
 
     private InvocationFinishedEvent event(InvocationFinishedEvent.EventType type) {
-        InvocationFinishedEvent e = mock(InvocationFinishedEvent.class);
+        InvocationFinishedEvent e= mock(InvocationFinishedEvent.class);
         when(e.getEventType()).thenReturn(type);
         return e;
     }

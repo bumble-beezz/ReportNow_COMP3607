@@ -26,12 +26,11 @@ class PdfExporterTest {
     void producesValidPdf() throws Exception {
         SessionData data = new SessionData();
         data.recordCompile("P", true, 100, new ArrayList<>());
-        data.recordCompile("P", false, 200,
-                List.of(new CompileError("Foo.java", 7, "ERROR", "boom")));
+        data.recordCompile("P", false, 200, List.of(new CompileError("Foo.java", 7, "ERROR", "boom")));
         data.recordRun("P", true, 50, null);
         data.endSession();
 
-        File out = tempDir.resolve("report.pdf").toFile();
+        File out= tempDir.resolve("report.pdf").toFile();
         new PdfExporter("S", "P").export(data, out);
 
         byte[] bytes = Files.readAllBytes(out.toPath());
@@ -57,8 +56,7 @@ class PdfExporterTest {
         data.recordCompile("P", true, 100, new ArrayList<>());
         data.endSession();
         List<SessionSummary> past = new ArrayList<>();
-        past.add(new SessionSummary("S", "P", "old",
-                1000L, 500L, 2, 1, 1, 0, 300L, 200L));
+        past.add(new SessionSummary("S", "P", "old", 1000L, 500L, 2, 1, 1, 0, 300L, 200L));
         data.setPastSessions(past);
 
         File out = tempDir.resolve("past.pdf").toFile();
@@ -98,8 +96,7 @@ class PdfExporterTest {
     void pdfWithManyErrorsStillWorks() {
         SessionData data = new SessionData();
         for (int i = 0; i < 20; i++) {
-            data.recordCompile("P", false, 10,
-                    List.of(new CompileError("A.java", i, "ERROR", "boom " + i)));
+            data.recordCompile("P", false, 10,List.of(new CompileError("A.java", i, "ERROR", "boom " + i)));
         }
         data.endSession();
 

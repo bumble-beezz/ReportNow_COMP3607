@@ -39,7 +39,7 @@ class JsonExporterTest {
         assertTrue(out.length() > 0);
 
         JsonNode root = new ObjectMapper().readTree(out);
-        JsonNode meta = root.get("session_metadata");
+        JsonNode meta= root.get("session_metadata");
         assertNotNull(meta);
         assertEquals("STUDENT", meta.get("student_id").asText());
         assertEquals("P", meta.get("project_name").asText());
@@ -49,7 +49,6 @@ class JsonExporterTest {
         assertEquals(1, meta.get("failed_compilations").asInt());
         assertEquals(1, meta.get("total_execution_attempts").asInt());
 
-        // Fields added by the newer SessionData API
         assertTrue(meta.has("typing_cadence_ms"));
         assertTrue(meta.has("edits_per_minute"));
         assertEquals(0L, meta.get("typing_cadence_ms").asLong());
@@ -62,8 +61,7 @@ class JsonExporterTest {
     @Test
     void errorDetailsAreSerialised() throws Exception {
         SessionData data = new SessionData();
-        data.recordCompile("P", false, 10,
-                List.of(new CompileError("A.java", 5, "ERROR", "msg")));
+        data.recordCompile("P", false, 10,List.of(new CompileError("A.java", 5, "ERROR", "msg")));
 
         File out = tempDir.resolve("errors.json").toFile();
         new JsonExporter("S", "P").export(data, out);
@@ -113,10 +111,8 @@ class JsonExporterTest {
         SessionData data = new SessionData();
         data.endSession();
         List<SessionSummary> past = new ArrayList<>();
-        past.add(new SessionSummary("STUDENT", "P", "old-session",
-                1000L, 500L, 1, 1, 0, 1, 300L, 200L));
-        past.add(new SessionSummary("STUDENT", "OtherProject", "other-session",
-                2000L, 500L, 1, 1, 0, 1, 300L, 200L));
+        past.add(new SessionSummary("STUDENT", "P", "old-session",1000L, 500L, 1, 1, 0, 1, 300L, 200L));
+        past.add(new SessionSummary("STUDENT", "OtherProject", "other-session", 2000L, 500L, 1, 1, 0, 1, 300L, 200L));
         data.setPastSessions(past);
 
         File out = tempDir.resolve("past.json").toFile();

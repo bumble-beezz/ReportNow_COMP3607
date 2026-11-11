@@ -26,7 +26,7 @@ class TrackDocumentEditsTest {
         editor = mock(JavaEditor.class);
         data = mock(SessionData.class);
         when(editor.getTextLength()).thenReturn(100);
-        tracker = new TrackDocumentEdits(editor, data);
+        tracker= new TrackDocumentEdits(editor, data);
     }
 
     @Test
@@ -40,7 +40,7 @@ class TrackDocumentEditsTest {
     void editRecordedWhenTextLengthChanges() {
         when(editor.getTextLength()).thenReturn(150);
         tracker.checkForEdits();
-        verify(data, times(1)).recordEdit(any(Instant.class));
+        verify(data,times(1)).recordEdit(any(Instant.class));
     }
 
     @Test
