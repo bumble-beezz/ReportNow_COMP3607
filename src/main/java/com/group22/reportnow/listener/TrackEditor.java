@@ -1,4 +1,6 @@
 //https://www.bluej.org/doc/extensionsAPI2/bluej/extensions2/editor/JavaEditor.html
+//https://www.bluej.org/doc/extensionsAPI2/bluej/extensions2/BClass.html
+//https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/IdentityHashMap.html
 package com.group22.reportnow.listener;
 
 import java.util.IdentityHashMap;
@@ -46,16 +48,16 @@ public class TrackEditor implements PackageListener {
                         }
                     }
                 }
-            } catch (ProjectNotOpenException | PackageNotFoundException e) {
-                System.err.println("Could not scan editors: " + e.getMessage());
+            }catch(ProjectNotOpenException | PackageNotFoundException e) {
+                System.out.println("Could not scan editors: " + e.getMessage());
             }
+        }
+        for (TrackDocumentEdits watcher : attached.values()) {
+            watcher.checkForEdits();
         }
     }
 
     public void detachAll() {
-        for (TrackDocumentEdits watcher : attached.values()) {
-            watcher.detach();
-        }
         attached.clear();
     }
 }
