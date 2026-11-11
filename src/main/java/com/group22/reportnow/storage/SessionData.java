@@ -145,33 +145,52 @@ public class SessionData {
         return getRunEvents().size() - getSuccessfulRunCount();
     }
 
+    
     public synchronized long getActiveTimeMs() {
         long fromEdits = getActiveTimeFromEditsMs();
+
         if (fromEdits > 0) {
             return fromEdits;
         }
+
         long total = 0L;
+
         for (TelemetryEvent e : events) {
             if (e instanceof CompileEvent) {
                 total += ((CompileEvent) e).getDurationMs();
             } else if (e instanceof RunEvent) {
                 total += ((RunEvent) e).getDurationMs();
             }
-        } return total;
+        }
+
+        return total;   
     }
+
+        
 
     public synchronized long getActiveTimeFromEditsMs() {
         if (editTimes.size() < 2) {
             return 0L;
         }
+
         long total = 0L;
+
         for (int i = 1; i < editTimes.size(); i++) {
-            long gap = Duration.between(editTimes.get(i - 1), editTimes.get(i)).toMillis();
-            if (gap < IDLE_THRESHOLD_MS) {
+            long gap = Duration.between(
+                editTimes.get(i - 1),
+                editTimes.get(i)
+            ).toMillis();
+
+            if (gap >= 0 && gap < IDLE_THRESHOLD_MS) {
                 total += gap;
             }
-        } return total;
+        }
+
+        return total;
     }
+
+       
+
 
     public synchronized long getSessionDurationMs() {
         if (endMs > 0) {
