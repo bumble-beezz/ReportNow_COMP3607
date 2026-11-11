@@ -12,9 +12,9 @@ import com.group22.reportnow.export.JsonExporter;
 import com.group22.reportnow.export.LoadPastSessions;
 import com.group22.reportnow.export.PdfExporter;
 import com.group22.reportnow.listener.RecordCompile;
-import com.group22.reportnow.listener.RecordRun;
-import com.group22.reportnow.listener.WatchEditor;
-import com.group22.reportnow.listener.WatchProject;
+import com.group22.reportnow.listener.ExecutionListener;
+import com.group22.reportnow.listener.TrackEditor;
+import com.group22.reportnow.listener.ProjectLifecycleListener;
 import com.group22.reportnow.storage.SessionData;
 
 import bluej.extensions2.BPackage;
@@ -24,13 +24,12 @@ import bluej.extensions2.MenuGenerator;
 import javafx.scene.control.MenuItem;
 
 public class ReportNowExtension extends Extension {
-
     private BlueJ bluej;
     private SessionData data;
-    private WatchProject projectWatcher;
+    private ProjectLifecycleListener projectListener;
     private RecordCompile compileRecorder;
-    private RecordRun runRecorder;
-    private WatchEditor editorWatcher;
+    private ExecutionListener execute;
+    private TrackEditor editorTracker;
     private String studentId;
     private boolean shuttingDown = false;
 
@@ -40,16 +39,16 @@ public class ReportNowExtension extends Extension {
         this.data = new SessionData();
         this.studentId = new StoreStudentId().getStudentId();
 
-        projectWatcher = new WatchProject(data, this::onProjectClosed);
+        projectListener = new ProjectLifecycleListener(data, this::onProjectClosed);
         compileRecorder = new RecordCompile(data);
-        runRecorder = new RecordRun(data);
-        editorWatcher = new WatchEditor(bluej, data);
+        execute = new ExecutionListener(data);
+        editorTracker= new TrackEditor(bluej, data);
 
-        bluej.addPackageListener(projectWatcher);
+        bluej.addPackageListener(projectListener);
         bluej.addCompileListener(compileRecorder);
-        bluej.addInvocationFinishedListener(runRecorder);
-        bluej.addClassListener(projectWatcher.getClassWatcher());
-        bluej.addPackageListener(editorWatcher);
+        bluej.addInvocationFinishedListener(execute);
+        bluej.addClassListener(projectListener.getClassListener());
+        bluej.addPackageListener(editorTracker);
 
         bluej.setMenuGenerator(new MenuGenerator() {
             @Override
@@ -67,12 +66,12 @@ public class ReportNowExtension extends Extension {
     public void terminate() {
         shuttingDown = true;
         if (bluej != null) {
-            bluej.removePackageListener(projectWatcher);
+            bluej.removePackageListener(projectListener);
             bluej.removeCompileListener(compileRecorder);
-            bluej.removeInvocationFinishedListener(runRecorder);
-            bluej.removeClassListener(projectWatcher.getClassWatcher());
-            bluej.removePackageListener(editorWatcher);
-            editorWatcher.detachAll();
+            bluej.removeInvocationFinishedListener(execute);
+            bluej.removeClassListener(projectListener.getClassListener());
+            bluej.removePackageListener(editorTracker);
+            editorTracker.detachAll();
         }
         data.endSession();
         export(new File(System.getProperty("user.home"), "reportnow"), "project", false);
