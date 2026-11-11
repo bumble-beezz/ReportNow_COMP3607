@@ -17,7 +17,6 @@ import com.group22.reportnow.model.SessionSummary;
 import com.group22.reportnow.model.TelemetryEvent;
 
 public class SessionData {
-
     private static final long IDLE_THRESHOLD_MS =180_000;
 
     private final String sessionId;
@@ -53,16 +52,19 @@ public class SessionData {
     }
 
     public synchronized long getTypingCadence(){
-        if (editTimes.size() < 2) {
+        long total = 0;
+        int count = 0;
+        for(int i = 1; i < editTimes.size(); i++){
+            long gap = Duration.between(editTimes.get(i - 1), editTimes.get(i)).toMillis();
+            if (gap >= 0 && gap < IDLE_THRESHOLD_MS) {
+                total += gap;
+                count++;
+            }
+        }
+        if (count == 0) {
             return 0;
         }
-
-        long total = 0;
-        for (int i = 1; i < editTimes.size(); i++) {
-        long gap = Duration.between(editTimes.get(i - 1), editTimes.get(i)).toMillis();
-        total += gap;
-        }
-        return total / (editTimes.size() - 1);
+        return total / count;
     }
 
     public synchronized double getEditsPerMinute(){

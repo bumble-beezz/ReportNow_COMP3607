@@ -1,6 +1,8 @@
 package com.group22.reportnow;
 
 import java.io.File;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -22,6 +24,7 @@ import bluej.extensions2.BlueJ;
 import bluej.extensions2.Extension;
 import bluej.extensions2.MenuGenerator;
 import javafx.scene.control.MenuItem;
+import javafx.application.Platform;
 
 public class ReportNowExtension extends Extension {
     private BlueJ bluej;
@@ -30,6 +33,7 @@ public class ReportNowExtension extends Extension {
     private RecordCompile compileRecorder;
     private ExecutionListener execute;
     private TrackEditor editorTracker;
+    private Timer editorTimer;
     private String studentId;
     private boolean shuttingDown = false;
 
@@ -50,6 +54,19 @@ public class ReportNowExtension extends Extension {
         bluej.addClassListener(projectListener.getClassListener());
         bluej.addPackageListener(editorTracker);
 
+        projectListener.startTimer();
+        editorTimer = new Timer("Editor Timer", true);
+        editorTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                Platform.runLater(() -> {
+                    if (!shuttingDown) {
+                        editorTracker.scanOpenEditors();
+                    }
+                });
+            }   
+        }, 1000, 1000);
+
         bluej.setMenuGenerator(new MenuGenerator() {
             @Override
             public MenuItem getToolsMenuItem(BPackage bp) {
@@ -65,6 +82,14 @@ public class ReportNowExtension extends Extension {
     @Override
     public void terminate() {
         shuttingDown = true;
+
+        if (editorTimer != null) {
+            editorTimer.cancel();
+        }
+        if (projectListener != null) {
+            projectListener.stopTimer();
+        }
+
         if (bluej != null) {
             bluej.removePackageListener(projectListener);
             bluej.removeCompileListener(compileRecorder);
@@ -74,7 +99,7 @@ public class ReportNowExtension extends Extension {
             editorTracker.detachAll();
         }
         data.endSession();
-        export(new File(System.getProperty("user.home"), "reportnow"), "project", false);
+        export(new File(System.getProperty("user.home"), "reportnow"), data.getCurrentProjectName(), false);
     }
 
     private void onProjectClosed(String projectName) {
@@ -93,7 +118,7 @@ public class ReportNowExtension extends Extension {
             String currentProject = data.getCurrentProjectName();
             export(chooser.getSelectedFile(), currentProject, true);
         }
-}
+    }
 
     private void export(File baseDir, String projectName, boolean showPopup) {
         if (!baseDir.exists()) {
