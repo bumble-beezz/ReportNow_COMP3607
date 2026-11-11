@@ -86,6 +86,8 @@ public class PdfExporter implements ExportStrategy {
                 "Failed compiles", String.valueOf(data.getFailedCompileCount()));
         addSummaryRow(table, "Runs", String.valueOf(data.getRunEvents().size()),
                 "Successful runs", String.valueOf(data.getSuccessfulRunCount()));
+        addSummaryRow(table, "Typing cadence", data.getTypingCadence() + " ms",
+                "Edits per minute", String.format("%.1f", data.getEditsPerMinute()));
         doc.add(table);
         doc.add(Chunk.NEWLINE);
     }

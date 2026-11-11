@@ -17,7 +17,6 @@ import com.group22.reportnow.model.TelemetryEvent;
 import com.group22.reportnow.storage.SessionData;
 
 public class JsonExporter implements ExportStrategy {
-
     private final String studentId;
     private final String projectName;
     private final ObjectMapper mapper;
@@ -58,7 +57,7 @@ public class JsonExporter implements ExportStrategy {
         for (TelemetryEvent e : data.getEvents()) {
             if (e instanceof ProjectEvent) {
                 ProjectEvent pe = (ProjectEvent) e;
-                if (!pe.getAction().equals("ProjectModified") && pe.getProjectName().equals(projectName)) {
+                if (pe.getProjectName().equals(projectName)) {
                     filtered.add(e);
                 }
             } else if (e instanceof ClassEvent) {
@@ -117,6 +116,8 @@ public class JsonExporter implements ExportStrategy {
         m.put("failed_executions", totalRuns - successRuns);
         m.put("active_time_ms", data.getActiveTimeMs());
         m.put("idle_time_ms", data.getIdleTimeMs());
+        m.put("typing_cadence_ms", data.getTypingCadence());
+        m.put("edits_per_minute", data.getEditsPerMinute());
         return m;
     }
 }
