@@ -13,18 +13,19 @@ import com.group22.reportnow.export.ExportException;
 import com.group22.reportnow.export.JsonExporter;
 import com.group22.reportnow.export.LoadPastSessions;
 import com.group22.reportnow.export.PdfExporter;
-import com.group22.reportnow.listener.RecordCompile;
 import com.group22.reportnow.listener.ExecutionListener;
-import com.group22.reportnow.listener.TrackEditor;
 import com.group22.reportnow.listener.ProjectLifecycleListener;
+import com.group22.reportnow.listener.RecordCompile;
+import com.group22.reportnow.listener.TrackEditor;
+import com.group22.reportnow.storage.ConsoleOutputCapture;
 import com.group22.reportnow.storage.SessionData;
 
 import bluej.extensions2.BPackage;
 import bluej.extensions2.BlueJ;
 import bluej.extensions2.Extension;
 import bluej.extensions2.MenuGenerator;
-import javafx.scene.control.MenuItem;
 import javafx.application.Platform;
+import javafx.scene.control.MenuItem;
 
 public class ReportNowExtension extends Extension {
     private BlueJ bluej;
@@ -36,17 +37,20 @@ public class ReportNowExtension extends Extension {
     private Timer editorTimer;
     private String studentId;
     private boolean shuttingDown = false;
+    private ConsoleOutputCapture consoleCapture;
 
     @Override
     public void startup(BlueJ bluej) {
         this.bluej = bluej;
         this.data = new SessionData();
         this.studentId = new StoreStudentId().getStudentId();
+        this.consoleCapture = new ConsoleOutputCapture();
+        this.consoleCapture.start();
 
         projectListener = new ProjectLifecycleListener(data, this::onProjectClosed);
         compileRecorder = new RecordCompile(data);
         execute = new ExecutionListener(data);
-        editorTracker= new TrackEditor(bluej, data);
+        editorTracker = new TrackEditor(bluej, data);
 
         bluej.addPackageListener(projectListener);
         bluej.addCompileListener(compileRecorder);
@@ -60,11 +64,9 @@ public class ReportNowExtension extends Extension {
             @Override
             public void run() {
                 Platform.runLater(() -> {
-                    if (!shuttingDown) {
-                        editorTracker.scanOpenEditors();
-                    }
+                    if (!shuttingDown) editorTracker.scanOpenEditors();
                 });
-            }   
+            }
         }, 1000, 1000);
 
         bluej.setMenuGenerator(new MenuGenerator() {
@@ -100,6 +102,9 @@ public class ReportNowExtension extends Extension {
         }
         data.endSession();
         export(new File(System.getProperty("user.home"), "reportnow"), data.getCurrentProjectName(), false);
+        if (consoleCapture != null) {
+            consoleCapture.stop();
+        }
     }
 
     private void onProjectClosed(String projectName) {
@@ -115,17 +120,14 @@ public class ReportNowExtension extends Extension {
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         chooser.setDialogTitle("Choose folder to save ReportNow files");
         if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-            String currentProject = data.getCurrentProjectName();
-            export(chooser.getSelectedFile(), currentProject, true);
+            export(chooser.getSelectedFile(), data.getCurrentProjectName(), true);
         }
     }
 
     private void export(File baseDir, String projectName, boolean showPopup) {
-        if (!baseDir.exists()) {
-            if (!baseDir.mkdirs()) {
-                System.err.println("Could not create directory: " + baseDir);
-                return;
-            }
+        if (!baseDir.exists() && !baseDir.mkdirs()) {
+            System.err.println("Could not create directory: " + baseDir);
+            return;
         }
 
         LoadPastSessions loader = new LoadPastSessions();
@@ -134,6 +136,14 @@ public class ReportNowExtension extends Extension {
         File projectDir = new File(baseDir, projectName);
         if (!projectDir.exists()) {
             projectDir.mkdirs();
+        }
+
+        if (consoleCapture != null) {
+            try {
+                consoleCapture.writeToFile(new File(projectDir, "console-output.txt"));
+            } catch (Exception e) {
+                System.err.println("[ReportNow] Could not write console output: " + e.getMessage());
+            }
         }
 
         long stamp = System.currentTimeMillis();
@@ -150,37 +160,18 @@ public class ReportNowExtension extends Extension {
             System.out.println("[ReportNow] Wrote " + jsonFile + " and " + pdfFile);
 
             if (showPopup) {
-                JOptionPane.showMessageDialog(null,
-                        "Saved:\n" + jsonFile.getAbsolutePath() + "\n" + pdfFile.getAbsolutePath(),
-                        "ReportNow Export",
-                        JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Saved:\n" + jsonFile.getAbsolutePath() + "\n" + pdfFile.getAbsolutePath(), "ReportNow Export", JOptionPane.INFORMATION_MESSAGE);
             }
         } catch (ExportException e) {
             System.err.println("[ReportNow] Export failed: " + e.getMessage());
             if (showPopup) {
-                JOptionPane.showMessageDialog(null, "Export failed: " + e.getMessage(),
-                        "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Export failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
-    @Override
-    public String getName() {
-        return "ReportNow Telemetry";
-    }
-
-    @Override
-    public String getVersion() {
-        return "1.0.0";
-    }
-
-    @Override
-    public boolean isCompatible() {
-        return true;
-    }
-
-    @Override
-    public String getDescription() {
-        return "Collects coding telemetry and exports JSON and PDF reports.";
-    }
+    @Override public String getName() { return "ReportNow Telemetry"; }
+    @Override public String getVersion() { return "1.0.0"; }
+    @Override public boolean isCompatible() { return true; }
+    @Override public String getDescription() { return "Collects coding telemetry and exports JSON and PDF reports."; }
 }

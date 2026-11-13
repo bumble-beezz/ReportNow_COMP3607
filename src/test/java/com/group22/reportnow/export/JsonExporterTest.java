@@ -39,7 +39,7 @@ class JsonExporterTest {
         assertTrue(out.length() > 0);
 
         JsonNode root = new ObjectMapper().readTree(out);
-        JsonNode meta= root.get("session_metadata");
+        JsonNode meta = root.get("session_metadata");
         assertNotNull(meta);
         assertEquals("STUDENT", meta.get("student_id").asText());
         assertEquals("P", meta.get("project_name").asText());
@@ -53,26 +53,38 @@ class JsonExporterTest {
         assertTrue(meta.has("edits_per_minute"));
         assertEquals(0L, meta.get("typing_cadence_ms").asLong());
 
-        JsonNode events = root.get("events");
-        assertNotNull(events);
-        assertEquals(3, events.size());
+        JsonNode compilations = root.get("compilation_summary");
+        assertNotNull(compilations);
+        assertEquals(2, compilations.size());
+
+        JsonNode executions = root.get("execution_summary");
+        assertNotNull(executions);
+        assertEquals(1, executions.size());
     }
 
     @Test
     void errorDetailsAreSerialised() throws Exception {
         SessionData data = new SessionData();
-        data.recordCompile("P", false, 10,List.of(new CompileError("A.java", 5, "ERROR", "msg")));
+        data.recordCompile("P", false, 10,
+                List.of(new CompileError("A.java", 5, "ERROR", "msg")));
 
         File out = tempDir.resolve("errors.json").toFile();
         new JsonExporter("S", "P").export(data, out);
 
-        JsonNode compile = new ObjectMapper().readTree(out).get("events").get(0);
-        assertEquals("COMPILATION", compile.get("event_type").asText());
-        assertTrue(!compile.get("success").asBoolean());
-        JsonNode err = compile.get("errors").get(0);
-        assertEquals("A.java", err.get("file_name").asText());
-        assertEquals(5, err.get("line_number").asInt());
-        assertEquals("ERROR", err.get("error_code").asText());
+        JsonNode root = new ObjectMapper().readTree(out);
+        JsonNode compilations = root.get("compilation_summary");
+        assertNotNull(compilations);
+        assertEquals(1, compilations.size());
+        JsonNode compile = compilations.get(0);
+        assertEquals("FAILED", compile.get("result").asText());
+        assertEquals(1, compile.get("error_count").asInt());
+        assertEquals("A.java:5", compile.get("first_error").asText());
+
+        JsonNode freqs = root.get("compilation_error_frequencies");
+        assertNotNull(freqs);
+        assertEquals(1, freqs.size());
+        assertEquals("A.java — msg", freqs.get(0).get("error").asText());
+        assertEquals(1, freqs.get(0).get("frequency").asInt());
     }
 
     @Test
@@ -83,9 +95,12 @@ class JsonExporterTest {
         File out = tempDir.resolve("run.json").toFile();
         new JsonExporter("S", "P").export(data, out);
 
-        JsonNode run = new ObjectMapper().readTree(out).get("events").get(0);
-        assertEquals("EXECUTION", run.get("event_type").asText());
-        assertTrue(!run.get("success").asBoolean());
+        JsonNode executions = new ObjectMapper().readTree(out).get("execution_summary");
+        assertNotNull(executions);
+        assertEquals(1, executions.size());
+        JsonNode run = executions.get(0);
+        assertEquals("FAILED", run.get("result").asText());
+        assertEquals(150, run.get("duration_ms").asLong());
         assertEquals("NullPointerException", run.get("message").asText());
     }
 
@@ -111,8 +126,8 @@ class JsonExporterTest {
         SessionData data = new SessionData();
         data.endSession();
         List<SessionSummary> past = new ArrayList<>();
-        past.add(new SessionSummary("STUDENT", "P", "old-session",1000L, 500L, 1, 1, 0, 1, 300L, 200L));
-        past.add(new SessionSummary("STUDENT", "OtherProject", "other-session", 2000L, 500L, 1, 1, 0, 1, 300L, 200L));
+        past.add(new SessionSummary("STUDENT", "P", "old-session", 1000L, 500L, 1, 1, 0, 1, 1, 0, 300L, 200L, 0L, 0.0));
+        past.add(new SessionSummary("STUDENT", "OtherProject", "other-session", 2000L, 500L, 1, 1, 0, 1, 1, 0, 300L, 200L, 0L, 0.0));
         data.setPastSessions(past);
 
         File out = tempDir.resolve("past.json").toFile();

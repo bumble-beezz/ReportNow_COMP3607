@@ -65,7 +65,7 @@ public class SessionData {
         if (count == 0) {
             return 0;
         }
-        return total / count;
+        return total/count;
     }
 
     public synchronized double getEditsPerMinute(){
@@ -119,7 +119,6 @@ public class SessionData {
             }
         } return result;
     }
-
     public synchronized int getSuccessfulCompileCount() {
         int count = 0;
         for (CompileEvent ce : getCompileEvents()) {
@@ -167,8 +166,6 @@ public class SessionData {
         return total;   
     }
 
-        
-
     public synchronized long getActiveTimeFromEditsMs() {
         if (editTimes.size() < 2) {
             return 0L;
@@ -189,9 +186,6 @@ public class SessionData {
 
         return total;
     }
-
-       
-
 
     public synchronized long getSessionDurationMs() {
         if (endMs > 0) {

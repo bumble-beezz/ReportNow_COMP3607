@@ -23,10 +23,7 @@ class ParseCompileErrorsTest {
 
     @Test
     void parsesMultipleLines() {
-        List<CompileError>out = parser.parse(
-                "A.java:1: error: boom\n" +
-                "B.java:2: warning: unused\n" +
-                "C.java:3: note: hint");
+        List<CompileError>out = parser.parse( "A.java:1: error: boom\n" + "B.java:2: warning: unused\n" + "C.java:3: note: hint");
         assertEquals(3, out.size());
         assertEquals("A.java", out.get(0).getFileName());
         assertEquals("B.java", out.get(1).getFileName());
@@ -35,9 +32,7 @@ class ParseCompileErrorsTest {
 
     @Test
     void ignoresNonMatchingLines() {
-        List<CompileError> out = parser.parse(
-                "just random text\n" +
-                "Foo.java:5: error: real one");
+        List<CompileError> out = parser.parse( "just random text\n" + "Foo.java:5: error: real one");
         assertEquals(1, out.size());
         assertEquals("Foo.java", out.get(0).getFileName());
     }

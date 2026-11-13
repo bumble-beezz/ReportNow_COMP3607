@@ -33,16 +33,33 @@ public class SessionSummary {
     @JsonProperty("total_execution_attempts")
     private int totalExecutionAttempts;
 
+    @JsonProperty("successful_executions")
+    private int successfulExecutions;
+
+    @JsonProperty("failed_executions")
+    private int failedExecutions;
+
     @JsonProperty("active_time_ms")
     private long activeTimeMs;
 
     @JsonProperty("idle_time_ms")
     private long idleTimeMs;
 
+    @JsonProperty("typing_cadence_ms")
+    private long typingCadenceMs;
+
+    @JsonProperty("edits_per_minute")
+    private double editsPerMinute;
+
     public SessionSummary() {
     }
 
-    public SessionSummary(String studentId, String projectName, String sessionId, long sessionStartMs, long sessionDurationMs, int totalCompilations, int successfulCompilations,int failedCompilations, int totalExecutionAttempts, long activeTimeMs, long idleTimeMs) {
+    public SessionSummary(String studentId, String projectName, String sessionId,
+                          long sessionStartMs, long sessionDurationMs,
+                          int totalCompilations, int successfulCompilations, int failedCompilations,
+                          int totalExecutionAttempts, int successfulExecutions, int failedExecutions,
+                          long activeTimeMs, long idleTimeMs,
+                          long typingCadenceMs, double editsPerMinute) {
         this.studentId = studentId;
         this.projectName = projectName;
         this.sessionId = sessionId;
@@ -52,8 +69,12 @@ public class SessionSummary {
         this.successfulCompilations = successfulCompilations;
         this.failedCompilations = failedCompilations;
         this.totalExecutionAttempts = totalExecutionAttempts;
+        this.successfulExecutions = successfulExecutions;
+        this.failedExecutions = failedExecutions;
         this.activeTimeMs = activeTimeMs;
         this.idleTimeMs = idleTimeMs;
+        this.typingCadenceMs = typingCadenceMs;
+        this.editsPerMinute = editsPerMinute;
     }
 
     public String getProjectName() {
@@ -95,11 +116,27 @@ public class SessionSummary {
         return totalExecutionAttempts;
     }
 
+    public int getSuccessfulExecutions() {
+        return successfulExecutions;
+    }
+
+    public int getFailedExecutions() {
+        return failedExecutions;
+    }
+
     public long getActiveTimeMs() {
         return activeTimeMs;
     }
 
     public long getIdleTimeMs() {
         return idleTimeMs;
+    }
+
+    public long getTypingCadenceMs() {
+        return typingCadenceMs;
+    }
+
+    public double getEditsPerMinute() {
+        return editsPerMinute;
     }
 }

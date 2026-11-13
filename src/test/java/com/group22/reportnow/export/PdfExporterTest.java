@@ -49,14 +49,13 @@ class PdfExporterTest {
         assertDoesNotThrow(() -> new PdfExporter("S", "P").export(data, out));
         assertTrue(out.length() > 0);
     }
-
     @Test
     void withPastSessionsStillWorks() {
         SessionData data = new SessionData();
         data.recordCompile("P", true, 100, new ArrayList<>());
         data.endSession();
         List<SessionSummary> past = new ArrayList<>();
-        past.add(new SessionSummary("S", "P", "old", 1000L, 500L, 2, 1, 1, 0, 300L, 200L));
+        past.add(new SessionSummary("S", "P", "old", 1000L, 500L, 2, 1, 1, 0, 0, 0, 300L, 200L, 0L, 0.0));
         data.setPastSessions(past);
 
         File out = tempDir.resolve("past.pdf").toFile();
