@@ -5,9 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import com.group22.reportnow.storage.SessionData;
-
 import bluej.extensions2.BClass;
 import bluej.extensions2.BPackage;
 import bluej.extensions2.BProject;
@@ -15,7 +13,7 @@ import bluej.extensions2.BlueJ;
 import bluej.extensions2.editor.JavaEditor;
 import bluej.extensions2.event.PackageEvent;
 
-class TrackEditorTest {
+public class TrackEditorTest {
 
     private BlueJ bluej;
     private SessionData data;
