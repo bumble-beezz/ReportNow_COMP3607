@@ -1,3 +1,4 @@
+//https://javadoc.io/doc/com.github.librepdf/openpdf/latest/com.github.librepdf.openpdf/module-summary.html
 package com.group22.reportnow.export;
 
 import java.awt.Color;
@@ -49,6 +50,7 @@ public class PdfExporter implements ExportStrategy {
             addSummary(doc, data);
             addCompileTable(doc, data);
             addRunTable(doc, data);
+            addConsoleSummary(doc,file);
             addClassTable(doc, data);
             addErrorFrequency(doc, data);
             addPastSessions(doc, data);
@@ -113,8 +115,7 @@ public class PdfExporter implements ExportStrategy {
     }
 
     private void addCompileTable(Document doc, SessionData data) throws Exception {
-        doc.add(new Paragraph("Compilations",
-                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, new Color(60, 90, 150))));
+        doc.add(new Paragraph("Compilations", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, new Color(60, 90, 150))));
         doc.add(Chunk.NEWLINE);
 
         PdfPTable table = new PdfPTable(new float[]{3f, 2f, 2f, 2f, 5f});
@@ -155,8 +156,7 @@ public class PdfExporter implements ExportStrategy {
     }
 
     private void addRunTable(Document doc, SessionData data) throws Exception {
-        doc.add(new Paragraph("Runs",
-                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, new Color(60, 90, 150))));
+        doc.add(new Paragraph("Runs", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, new Color(60, 90, 150))));
         doc.add(Chunk.NEWLINE);
 
         PdfPTable table = new PdfPTable(new float[]{3f, 2f, 2f, 5f});
@@ -182,7 +182,11 @@ public class PdfExporter implements ExportStrategy {
             }
             addCell(table, Instant.ofEpochMilli(re.getTimestampMs()).toString(), bg);
             addCell(table, result, bg);
-            addCell(table, re.getDurationMs() + " ms", bg);
+            if (re.getDurationMs() == 0) {
+                addCell(table, "N/A", bg);
+            }else{
+                addCell(table, re.getDurationMs() + " ms", bg);
+            }
             String detail = re.getMessage();
             if (detail == null) {
                 detail = "-";
@@ -195,8 +199,7 @@ public class PdfExporter implements ExportStrategy {
     }
 
     private void addClassTable(Document doc, SessionData data) throws Exception {
-        doc.add(new Paragraph("Class Activity",
-                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, new Color(60, 90, 150))));
+        doc.add(new Paragraph("Class Activity", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, new Color(60, 90, 150))));
         doc.add(Chunk.NEWLINE);
 
         PdfPTable table = new PdfPTable(new float[]{3f, 3f, 4f});
@@ -223,9 +226,20 @@ public class PdfExporter implements ExportStrategy {
         doc.add(Chunk.NEWLINE);
     }
 
+
+    private void addConsoleSummary(Document doc, File file) throws Exception {
+        doc.add(new Paragraph("Console Output Summary", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
+        File consoleFile = new File(file.getAbsoluteFile().getParentFile(), "console-output.txt");
+
+        String summary = new ConsoleSummary().summarize(consoleFile);
+
+        doc.add(new Paragraph(summary));
+        doc.add(Chunk.NEWLINE);
+    }
+
+
     private void addErrorFrequency(Document doc, SessionData data) throws Exception {
-        doc.add(new Paragraph("Compilation Error Frequency",
-                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, new Color(60, 90, 150))));
+        doc.add(new Paragraph("Compilation Error Frequency", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, new Color(60, 90, 150))));
         doc.add(Chunk.NEWLINE);
 
         Map<String, Integer> counts = new LinkedHashMap<>();
@@ -279,8 +293,7 @@ public class PdfExporter implements ExportStrategy {
         }
 
         doc.newPage();
-        doc.add(new Paragraph("Past Sessions",
-                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, new Color(60, 90, 150))));
+        doc.add(new Paragraph("Past Sessions", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, new Color(60, 90, 150))));
         doc.add(Chunk.NEWLINE);
 
         PdfPTable table = new PdfPTable(new float[]{3f, 3f, 2f, 2f, 2f});
@@ -307,8 +320,7 @@ public class PdfExporter implements ExportStrategy {
 
     private void addHeader(PdfPTable table, String... headers) {
         for (String h : headers) {
-            PdfPCell cell = new PdfPCell(new Phrase(h,
-                    FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, Color.WHITE)));
+            PdfPCell cell = new PdfPCell(new Phrase(h, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, Color.WHITE)));
             cell.setBackgroundColor(new Color(60, 90, 150));
             cell.setPadding(6f);
             table.addCell(cell);
@@ -320,8 +332,7 @@ public class PdfExporter implements ExportStrategy {
         if (actual == null) {
             actual = "";
         }
-        PdfPCell cell = new PdfPCell(new Phrase(actual,
-                FontFactory.getFont(FontFactory.HELVETICA, 8)));
+        PdfPCell cell = new PdfPCell(new Phrase(actual, FontFactory.getFont(FontFactory.HELVETICA, 8)));
         cell.setBackgroundColor(bg);
         cell.setPadding(5f);
         table.addCell(cell);

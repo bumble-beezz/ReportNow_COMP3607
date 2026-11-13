@@ -1,3 +1,4 @@
+//https://www.baeldung.com/jackson-object-mapper-tutorial
 package com.group22.reportnow.export;
 
 import java.io.File;
@@ -35,6 +36,10 @@ public class JsonExporter implements ExportStrategy {
             Map<String, Object> root = new LinkedHashMap<>();
             root.put("session_metadata", buildMetadata(data, filtered));
             root.put("events", filtered);
+
+            File consoleFile = new File(file.getAbsoluteFile().getParentFile(), "console-output.txt");
+            String consoleSummary = new ConsoleSummary().summarize(consoleFile);
+            root.put("console_output_summary", consoleSummary);
 
             List<SessionSummary> past = new ArrayList<>();
             for (SessionSummary s : data.getPastSessions()) {
