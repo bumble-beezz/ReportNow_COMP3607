@@ -1,4 +1,7 @@
 package com.group22.reportnow.storage;
+//https://www.bluej.org/extensions/writingextensions2.html
+//https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/PrintStream.html
+//https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/regex/Pattern.html
 
 import java.io.File;
 import java.io.FileOutputStream;
