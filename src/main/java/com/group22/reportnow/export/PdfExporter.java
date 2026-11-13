@@ -160,22 +160,22 @@ public class PdfExporter implements ExportStrategy {
         chart.setWidthPercentage(100);
         chart.setWidths(new float[]{Math.max(0.01f, (float) active), Math.max(0.01f, (float) idle)});
 
-        PdfPCell activeCell = new PdfPCell(new Phrase("Active", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8, Color.WHITE)));
-        activeCell.setBackgroundColor(new Color(66, 133, 244));
-        activeCell.setFixedHeight(20);
+        PdfPCell activeCell = new PdfPCell(new Phrase(String.format("Active\n %.1f%%", activePercent), FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8, Color.WHITE)));
+        activeCell.setBackgroundColor(new Color(60, 90, 150));
+        activeCell.setFixedHeight(30);
         activeCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         activeCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         chart.addCell(activeCell);
 
-        PdfPCell idleCell = new PdfPCell(new Phrase("Idle", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8, Color.BLACK)));
-        idleCell.setBackgroundColor(new Color(200, 200, 200));
-        idleCell.setFixedHeight(20);
+        PdfPCell idleCell = new PdfPCell(new Phrase(String.format("Idle\n %.1f%%", idlePercent), FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8, Color.BLACK)));
+        idleCell.setBackgroundColor(new Color(200, 216, 239));
+        idleCell.setFixedHeight(30);
         idleCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         idleCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         chart.addCell(idleCell);
 
         doc.add(chart);
-        Paragraph percentages = new Paragraph(String.format("Active: %.1f%%   |   Idle: %.1f%%", activePercent, idlePercent), FontFactory.getFont(FontFactory.HELVETICA, 10));
+        Paragraph percentages = new Paragraph("Active - (Dark Blue)  |   Idle - (Light Blue)", FontFactory.getFont(FontFactory.HELVETICA, 10));
         percentages.setSpacingBefore(8);
         percentages.setSpacingAfter(20);
         doc.add(percentages);
