@@ -46,7 +46,7 @@ public class ClassLifecycleListener implements ClassListener {
         for (File file : files) {
             if (file.isDirectory()) {
                 scan(file, projectName, recordChanges);
-            }else if (file.getName().endsWith(".java")) {
+            }else if (file.getName().endsWith(".java") && !file.getName().startsWith("__SHELL")) {
                 String path = file.getAbsolutePath();
                 long modified = file.lastModified();
                 Long previous = classes.get(path);

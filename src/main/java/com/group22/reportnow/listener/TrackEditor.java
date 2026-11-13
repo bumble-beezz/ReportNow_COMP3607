@@ -1,10 +1,10 @@
 //https://www.bluej.org/doc/extensionsAPI2/bluej/extensions2/editor/JavaEditor.html
 //https://www.bluej.org/doc/extensionsAPI2/bluej/extensions2/BClass.html
-//https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/IdentityHashMap.html
 
 package com.group22.reportnow.listener;
 
-import java.util.IdentityHashMap;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,7 +23,7 @@ import bluej.extensions2.event.PackageListener;
 public class TrackEditor implements PackageListener {
     private final BlueJ bluej;
     private final SessionData data;
-    private final Map<JavaEditor, TrackDocumentEdits> attached = new IdentityHashMap<>();
+    private final Map<String, TrackDocumentEdits> attached = new HashMap<>();
 
     public TrackEditor(BlueJ bluej, SessionData data) {
         this.bluej = bluej;
@@ -40,8 +40,7 @@ public class TrackEditor implements PackageListener {
     }
 
     public void scanOpenEditors() {
-        Set<JavaEditor> currentlyOpen = java.util.Collections.newSetFromMap(
-                new IdentityHashMap<JavaEditor, Boolean>());
+        Set<String> currentlyOpen = new HashSet<>();
 
         for (BProject project : bluej.getOpenProjects()) {
             try {
@@ -49,11 +48,12 @@ public class TrackEditor implements PackageListener {
                     for (BClass cls : pkg.getClasses()) {
                         JavaEditor editor = cls.getJavaEditorIfOpen();
 
-                        if (editor != null) {
-                            currentlyOpen.add(editor);
+                        if (editor != null && cls.getJavaFile() != null) {
+                            String path = cls.getJavaFile().getAbsolutePath();
+                            currentlyOpen.add(path);
 
-                            if (!attached.containsKey(editor)) {
-                                attached.put(editor, new TrackDocumentEdits(editor, data));
+                            if (!attached.containsKey(path)) {
+                                attached.put(path, new TrackDocumentEdits(editor, data));
                             }
                         }
                     }
@@ -63,7 +63,7 @@ public class TrackEditor implements PackageListener {
             }
         }
 
-        attached.keySet().removeIf(editor -> !currentlyOpen.contains(editor));
+        attached.keySet().removeIf(path -> !currentlyOpen.contains(path));
 
         for (TrackDocumentEdits watcher : attached.values()) {
             watcher.checkForEdits();

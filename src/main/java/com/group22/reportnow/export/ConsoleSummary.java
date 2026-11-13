@@ -14,7 +14,7 @@ public class ConsoleSummary {
         try {
             List<String> lines = Files.readAllLines(file.toPath());
             String summary = "Total output lines: " + lines.size();
-            for (int i = 0; i < lines.size() && i < 3; i++) {
+            for (int i = 0; i < lines.size() && i < 5; i++) {
                 summary += "\n" + lines.get(i);
             }
             return summary;

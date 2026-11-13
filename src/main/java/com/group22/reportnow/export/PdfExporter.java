@@ -48,6 +48,7 @@ public class PdfExporter implements ExportStrategy {
 
             addTitle(doc, data);
             addSummary(doc, data);
+            addTimeChart(doc, data);
             addCompileTable(doc, data);
             addRunTable(doc, data);
             addConsoleSummary(doc,file);
@@ -227,6 +228,54 @@ public class PdfExporter implements ExportStrategy {
     }
 
 
+    
+    private void addTimeChart(Document doc, SessionData data) throws Exception {
+        long active = data.getActiveTimeMs();
+        long idle = data.getIdleTimeMs();
+        long total = active + idle;
+
+        Paragraph heading = new Paragraph("Active vs Idle Time", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, new java.awt.Color(61, 94, 151)));
+        heading.setSpacingBefore(12);
+        heading.setSpacingAfter(10);
+        doc.add(heading);
+
+        if (total == 0) {
+            doc.add(new Paragraph("No activity recorded yet."));
+            return;
+        }
+
+        double activePercent = active * 100.0 / total;
+        double idlePercent = idle * 100.0 / total;
+
+        PdfPTable chart = new PdfPTable(2);
+        chart.setWidthPercentage(100);
+        chart.setWidths(new float[]{
+            Math.max(0.01f, (float) active),
+            Math.max(0.01f, (float) idle)
+        });
+
+        PdfPCell activeCell = new PdfPCell();
+        activeCell.setBackgroundColor(new java.awt.Color(155, 120, 210));
+        activeCell.setFixedHeight(15);
+        activeCell.setBorder(0);
+        chart.addCell(activeCell);
+
+        PdfPCell idleCell = new PdfPCell();
+        idleCell.setBackgroundColor(new java.awt.Color(150, 205, 245));
+        idleCell.setFixedHeight(15);
+        idleCell.setBorder(0);
+        chart.addCell(idleCell);
+
+        doc.add(chart);
+
+        Paragraph percentages = new Paragraph(String.format("Active (Purple): %.1f%%   |   Idle (Light Blue): %.1f%%", activePercent, idlePercent), FontFactory.getFont(FontFactory.HELVETICA, 9));
+
+        percentages.setSpacingBefore(8);
+        percentages.setSpacingAfter(12);
+        doc.add(percentages);
+    }
+
+
     private void addConsoleSummary(Document doc, File file) throws Exception {
         doc.add(new Paragraph("Console Output Summary", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
         File consoleFile = new File(file.getAbsoluteFile().getParentFile(), "console-output.txt");
@@ -236,7 +285,6 @@ public class PdfExporter implements ExportStrategy {
         doc.add(new Paragraph(summary));
         doc.add(Chunk.NEWLINE);
     }
-
 
     private void addErrorFrequency(Document doc, SessionData data) throws Exception {
         doc.add(new Paragraph("Compilation Error Frequency", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, new Color(60, 90, 150))));
