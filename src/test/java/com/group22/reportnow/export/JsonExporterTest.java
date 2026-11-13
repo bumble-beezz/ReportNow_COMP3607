@@ -5,20 +5,18 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group22.reportnow.model.CompileError;
 import com.group22.reportnow.model.SessionSummary;
 import com.group22.reportnow.storage.SessionData;
 
-class JsonExporterTest {
+public class JsonExporterTest {
 
     @TempDir
     Path tempDir;

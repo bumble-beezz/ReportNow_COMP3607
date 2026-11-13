@@ -8,12 +8,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import com.group22.reportnow.storage.SessionData;
-
 import bluej.extensions2.event.InvocationFinishedEvent;
 
-class ExecutionListenerTest {
+public class ExecutionListenerTest {
 
     private SessionData data;
     private ExecutionListener recorder;
