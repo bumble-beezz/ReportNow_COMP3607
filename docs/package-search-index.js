@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html","k":"18"},{"l":"com.group22.reportnow"},{"l":"com.group22.reportnow.config"},{"l":"com.group22.reportnow.export"},{"l":"com.group22.reportnow.listener"},{"l":"com.group22.reportnow.model"},{"l":"com.group22.reportnow.parser"},{"l":"com.group22.reportnow.storage"}];updateSearchResults();

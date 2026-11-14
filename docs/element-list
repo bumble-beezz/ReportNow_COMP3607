@@ -1,0 +1,7 @@
+com.group22.reportnow
+com.group22.reportnow.config
+com.group22.reportnow.export
+com.group22.reportnow.listener
+com.group22.reportnow.model
+com.group22.reportnow.parser
+com.group22.reportnow.storage
