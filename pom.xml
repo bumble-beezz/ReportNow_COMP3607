@@ -2,6 +2,7 @@
 <!--https://maven.apache.org/surefire/maven-surefire-plugin/examples/junit-platform.html
 https://maven.apache.org/plugins/maven-shade-plugin/examples/resource-transformers.html#ManifestResourceTransformer
 https://www.jacoco.org/jacoco/trunk/doc/maven.html
+https://www.baeldung.com/javadoc
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -129,6 +130,16 @@ https://www.jacoco.org/jacoco/trunk/doc/maven.html
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.12.0</version>
+                <configuration>
+                    <source>${maven.compiler.release}</source>
+                    <tags>
+                    </tags>
+                </configuration>
             </plugin>
         </plugins>
     </build>
