@@ -10,14 +10,23 @@ import java.util.Properties;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
+/**
+ * StoreStudentId
+ * Handles the student Id prompt used in ReportNow when a user opens BlueJ
+ */
+
 public class StoreStudentId {
+    /** Stores the student Id in the configuration properties */
     private Properties props = new Properties();
+    /** Stores the location of the configuration file */
     private File file = new File(System.getProperty("user.home") + "/.reportnow/config.properties");
 
+    /** Loads the saved student ID when the class is created */
     public StoreStudentId() {
         load();
     }
 
+    /** Reads the saved properties from the configuration file */
     private void load() {
         if (file.exists()) {
             try (FileInputStream in = new FileInputStream(file)) {
@@ -28,6 +37,7 @@ public class StoreStudentId {
         }
     }
 
+    /** Saves the student ID to the configuration file */
     private void save() {
         file.getParentFile().mkdirs();
 
@@ -38,6 +48,10 @@ public class StoreStudentId {
         }
     }
 
+    /**
+     * Gets the saved student ID or asks the student to enter one
+     * @return the student ID, or UNKNOWN_STUDENT if no ID is entered
+    */
     public String getStudentId() {
         String id = props.getProperty("student_id");
 
@@ -54,6 +68,10 @@ public class StoreStudentId {
         return id;
     }
 
+    /**
+     * Shows a pop-up window asking the student for their ID.
+     * @return the entered ID, or null if the window is cancelled
+    */
     private String askForId() {
         URL url = getClass().getResource("/reportnow_icon.png");
         ImageIcon icon = null;

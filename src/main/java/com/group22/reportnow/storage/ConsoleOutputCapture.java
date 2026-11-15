@@ -10,6 +10,10 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.regex.Pattern;
 
+/**
+ * Captures text written to System.out and System.err.
+ * Filters some internal messages before saving the output.
+ */
 public class ConsoleOutputCapture {
     private static final Pattern[] INTERNAL_PATTERNS = {
         Pattern.compile("^\\[ReportNow\\].*"),
@@ -30,11 +34,18 @@ public class ConsoleOutputCapture {
     private final PrintStream originalErr;
     private PrintStream capturingStream;
 
+    /**
+     * Creates the output capture object and saves the original output and error streams.
+    */
     public ConsoleOutputCapture() {
         this.originalOut = System.out;
         this.originalErr = System.err;
     }
 
+    /**
+     * Starts capturing text written to System.out and System.err.
+     * The captured text is also sent to the original output stream.
+    */
     public synchronized void start() {
         if (capturingStream != null) return;
         capturingStream = new PrintStream(new TeeOutputStream(buffer, originalOut), true);
@@ -42,6 +53,7 @@ public class ConsoleOutputCapture {
         System.setErr(capturingStream);
     }
 
+    /** Stops capturing output and restores the original streams.*/
     public synchronized void stop() {
         if (capturingStream == null) return;
         System.setOut(originalOut);
@@ -49,6 +61,10 @@ public class ConsoleOutputCapture {
         capturingStream= null;
     }
 
+    /**
+     * Gets the captured output after removing matching internal messages.
+     * @return the filtered output, or an empty string if none was captured
+    */
     public synchronized String getCapturedOutput() {
         String raw = buffer.toString();
         if (raw.isEmpty()) {
@@ -67,12 +83,22 @@ public class ConsoleOutputCapture {
         return filtered.toString();
     }
 
+    /**
+     * Saves the filtered captured output to a text file.
+     * @param file the file where the output will be saved
+     * @throws IOException if the file cannot be written
+    */
     public synchronized void writeToFile(File file) throws IOException {
         try (OutputStream out = new FileOutputStream(file)) {
             out.write(getCapturedOutput().getBytes());
         }
     }
 
+    /**
+     * Checks whether a line matches one of the internal message patterns.
+     * @param line the line of text being checked
+     * @return true if the line is considered internal, otherwise false
+    */
     private boolean isInternal(String line) {
         for (Pattern p : INTERNAL_PATTERNS) {
             if (p.matcher(line).matches()) return true;
@@ -80,6 +106,11 @@ public class ConsoleOutputCapture {
         return false;
     }
 
+    /**
+     * Creates a stream that copies output to a buffer and another stream.
+     * @param buffer the buffer used to store captured text
+     * @param original the original output stream
+    */
     private static class TeeOutputStream extends OutputStream {
         private final StringBuilder buffer;
         private final PrintStream original;

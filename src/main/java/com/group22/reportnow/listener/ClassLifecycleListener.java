@@ -15,17 +15,36 @@ import com.group22.reportnow.storage.SessionData;
 import bluej.extensions2.event.ClassEvent;
 import bluej.extensions2.event.ClassListener;
 
+/**
+ * Tracks changes made to Java classes in BlueJ.
+ * Records class creation, modification, deletion and changes in the number of methods.
+ */
 public class ClassLifecycleListener implements ClassListener {
+    /** Stores the session data used to record class events */
     private final SessionData data;
+    /** Counts the methods found in Java source files */
     private final MethodCounter counter = new MethodCounter();
+    /** Stores the last modified times of tracked Java files */
     private final Map<String, Long> classes = new HashMap<>();
+    /** Stores the number of methods previously found in each file */
     private final Map<String, Integer> methodCounts = new HashMap<>();
+    /** Stores the paths and names of tracked projects */
     private final Map<String, String> projects = new HashMap<>();
 
+    /**
+     * Creates the class listener and connects it to the session data.
+     * @param data the session data used to store class events
+    */
     public ClassLifecycleListener(SessionData data) {
         this.data = data;
     }
 
+    /**
+     * Adds a project to the list of projects being tracked.
+     * Then scans its Java files to record their initial state.
+     * @param folder the folder containing the project
+     * @param projectName the name of the project
+    */
     public synchronized void trackProject(File folder, String projectName) {
         String path = folder.getAbsolutePath();
         if (!projects.containsKey(path)) {
@@ -34,11 +53,24 @@ public class ClassLifecycleListener implements ClassListener {
         }
     }
 
+    /**
+     * Records a class activity and displays the project as modified.
+     * @param action the type of class activity
+     * @param className the name of the class
+     * @param projectName the name of the project
+    */
     private void recordEvent(String action, String className, String projectName) {
         data.recordClass(action, className, projectName);
         data.recordProject("ProjectModified", projectName);
     }
 
+
+    /**
+     * Scans Java files to detect class edits and changes in the number of methods.
+     * @param folder the folder being scanned
+     * @param projectName the name of the project
+     * @param recordChanges whether detected changes should be recorded
+    */
     private void scan(File folder, String projectName, boolean recordChanges) {
         File[] files= folder.listFiles();
         if (files == null) return;
@@ -73,6 +105,11 @@ public class ClassLifecycleListener implements ClassListener {
         }
     }
 
+
+    /**
+     * Checks tracked Java files for changes or deletion.
+     * Records class activity when changes are detected.
+    */
     public synchronized void checkFiles() {
         for (String path : projects.keySet()) {
             File folder = new File(path);
@@ -97,15 +134,30 @@ public class ClassLifecycleListener implements ClassListener {
         }
     }
 
+    /**
+     * Converts a class name into a Java filename.
+     * @param className the name of the class
+     * @return the filename ending in .java
+    */
     private String getFileName(String className) {
         int position = className.lastIndexOf(".");
         if (position >= 0) className = className.substring(position + 1);
         return className + ".java";
     }
 
+
+    /**
+     * Receives class state change events from BlueJ.
+     * No action is currently performed by this method.
+     * @param event the class state change event
+    */
     @Override
     public void classStateChanged(ClassEvent event) {}
 
+    /**
+     * Updates the tracked file information when a class is renamed.
+     * @param event the class rename event from BlueJ
+    */
     @Override
     public synchronized void classNameChanged(ClassEvent event) {
         try {
@@ -130,6 +182,10 @@ public class ClassLifecycleListener implements ClassListener {
         }
     }
 
+    /**
+     * Removes a deleted class from tracking and records the class deletion event.
+     * @param event the class removal event from BlueJ
+    */
     @Override
     public synchronized void classRemoved(ClassEvent event) {
         try {

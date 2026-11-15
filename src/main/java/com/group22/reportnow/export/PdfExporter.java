@@ -31,19 +31,38 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 
-public class PdfExporter implements ExportStrategy {
 
+/**
+ * Creates PDF reports using the telemetry data collected by ReportNow.
+ * It uses OpenPDF to display tables, summaries and an active vs idle chart.
+ */
+public class PdfExporter implements ExportStrategy {
+    /** Formats event timestamps as hours, minutes and seconds. */
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault());
+    /** Formats session dates and times for the report. */
     private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneId.systemDefault());
 
+    /** Stores the student ID displayed in the PDF */
     private final String studentId;
+    /** Stores the project name displayed in the PDF */
     private final String projectName;
 
+    /**
+     * Creates a PDF exporter for the selected student and project.
+     * @param studentId the student's ID
+     * @param projectName the name of the BlueJ project
+    */
     public PdfExporter(String studentId, String projectName) {
         this.studentId = studentId;
         this.projectName = projectName;
     }
 
+    /**
+     * Generates a PDF report containing the recorded session data.
+     * @param data the data collected during the session
+     * @param file the file where the PDF will be saved
+     * @throws ExportException if the PDF cannot be generated
+    */
     @Override
     public void export(SessionData data, File file) throws ExportException {
         try (FileOutputStream out = new FileOutputStream(file)) {
@@ -67,6 +86,12 @@ public class PdfExporter implements ExportStrategy {
         }
     }
 
+    /**
+     * Adds the report title, student ID, project name and session date.
+     * @param doc the PDF document
+     * @param data the recorded session data
+     * @throws Exception if content cannot be added to the PDF
+    */
     private void addTitle(Document doc, SessionData data) throws Exception {
         Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 22, new Color(60, 90, 150));
         Paragraph title = new Paragraph("ReportNow Session Report", titleFont);
@@ -81,6 +106,12 @@ public class PdfExporter implements ExportStrategy {
         doc.add(subPara);
     }
 
+    /**
+     * Adds a table showing the main session statistics.
+     * @param doc the PDF document
+     * @param data the recorded session data
+     * @throws Exception if content cannot be added to the PDF
+    */
     private void addSummary(Document doc, SessionData data) throws Exception {
         doc.add(new Paragraph("Session Summary", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, new Color(60, 90, 150))));
         doc.add(Chunk.NEWLINE);
@@ -120,6 +151,14 @@ public class PdfExporter implements ExportStrategy {
         doc.add(Chunk.NEWLINE);
     }
 
+    /**
+     * Adds two labels and their values to a summary table row.
+     * @param table the table receiving the row
+     * @param key1 the first label
+     * @param value1 the first value
+     * @param key2 the second label
+     * @param value2 the second value
+    */
     private void addSummaryRow(PdfPTable table, String key1, String value1, String key2, String value2) {
         table.addCell(summaryCell(key1, true));
         table.addCell(summaryCell(value1, false));
@@ -127,6 +166,12 @@ public class PdfExporter implements ExportStrategy {
         table.addCell(summaryCell(value2, false));
     }
     
+    /**
+     * Creates a cell for the session summary table.
+     * @param text the text displayed in the cell
+     * @param bold whether the text should be bold
+     * @return the formatted PDF cell
+    */
     private PdfPCell summaryCell(String text, boolean bold) {
         Font font;
         if (bold) {
@@ -141,6 +186,12 @@ public class PdfExporter implements ExportStrategy {
         return cell;
     }
 
+    /**
+     * Creates a bar chart showing the percentage of active and idle time.
+     * @param doc the PDF document
+     * @param data the recorded session data
+     * @throws Exception if content cannot be added to the PDF
+    */
     private void addTimeChart(Document doc, SessionData data) throws Exception {
         doc.add(new Paragraph("Active vs Idle Time", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, new Color(60, 90, 150))));
         doc.add(Chunk.NEWLINE);
@@ -181,6 +232,12 @@ public class PdfExporter implements ExportStrategy {
         doc.add(percentages);
     }
 
+    /**
+     * Adds a table showing how often compilation errors occurred.
+     * @param doc the PDF document
+     * @param data the recorded session data
+     * @throws Exception if content cannot be added to the PDF
+    */
     private void addErrorFrequency(Document doc, SessionData data) throws Exception {
         doc.add(new Paragraph("Compilation Error Frequencies", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, new Color(60, 90, 150))));
         doc.add(Chunk.NEWLINE);
@@ -223,6 +280,12 @@ public class PdfExporter implements ExportStrategy {
         doc.add(Chunk.NEWLINE);
     }
 
+    /**
+     * Adds the compilation results, including success, failure and errors.
+     * @param doc the PDF document
+     * @param data the recorded session data
+     * @throws Exception if content cannot be added to the PDF
+    */
     private void addCompileTable(Document doc, SessionData data) throws Exception {
         doc.add(new Paragraph("Compilation Summary", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, new Color(60, 90, 150))));
         doc.add(Chunk.NEWLINE);
@@ -278,6 +341,12 @@ public class PdfExporter implements ExportStrategy {
         doc.add(Chunk.NEWLINE);
     }
 
+    /**
+     * Adds the recorded class and method-related activities.
+     * @param doc the PDF document
+     * @param data the recorded session data
+     * @throws Exception if content cannot be added to the PDF
+    */
     private void addClassProgression(Document doc, SessionData data) throws Exception {
         doc.add(new Paragraph("Class & Method Progression", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, new Color(60, 90, 150))));
         doc.add(new Paragraph("Note: File modifications represent method definitions or code edits.", FontFactory.getFont(FontFactory.HELVETICA, 9, Color.DARK_GRAY)));
@@ -331,6 +400,12 @@ public class PdfExporter implements ExportStrategy {
         doc.add(Chunk.NEWLINE);
     }
 
+    /**
+     * Adds a table showing program execution results and exceptions.
+     * @param doc the PDF document
+     * @param data the recorded session data
+     * @throws Exception if content cannot be added to the PDF
+    */
     private void addRunTable(Document doc, SessionData data) throws Exception {
         doc.add(new Paragraph("Execution Summary", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, new Color(60, 90, 150))));
         doc.add(Chunk.NEWLINE);
@@ -394,7 +469,13 @@ public class PdfExporter implements ExportStrategy {
         doc.add(Chunk.NEWLINE);
     }
 
-        private void addConsoleSummary(Document doc, File file) throws Exception {
+    /**
+     * Adds the summary of manually saved BlueJ console output.
+     * @param doc the PDF document
+     * @param file the destination PDF file used to locate console-output.txt
+     * @throws Exception if content cannot be added to the PDF
+    */
+    private void addConsoleSummary(Document doc, File file) throws Exception {
         doc.add(new Paragraph("Console Output Summary", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, new Color(60, 90, 150))));
         doc.add(Chunk.NEWLINE);
 
@@ -418,6 +499,12 @@ public class PdfExporter implements ExportStrategy {
         doc.add(Chunk.NEWLINE);
     }
 
+    /**
+     * Adds a table showing information from previous sessions.
+     * @param doc the PDF document
+     * @param data the recorded session data
+     * @throws Exception if content cannot be added to the PDF
+    */
     private void addPastSessions(Document doc, SessionData data) throws Exception {
         List<SessionSummary> history = new ArrayList<>();
         for (SessionSummary s : data.getPastSessions()) {
@@ -454,6 +541,11 @@ public class PdfExporter implements ExportStrategy {
         doc.add(table);
     }
 
+    /**
+     * Adds blue header cells to a PDF table.
+     * @param table the table receiving the headers
+     * @param headers the column headings
+    */
     private void addHeader(PdfPTable table, String... headers) {
         for (String h : headers) {
             PdfPCell cell = new PdfPCell(new Phrase(h, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, Color.WHITE)));
@@ -465,6 +557,12 @@ public class PdfExporter implements ExportStrategy {
         table.setHeaderRows(1);
     }
 
+    /**
+     * Adds a regular cell to a PDF table.
+     * @param table the table receiving the cell
+     * @param text the text displayed in the cell
+     * @param bg the background color of the cell
+    */
     private void addCell(PdfPTable table, String text, Color bg) {
         String actual;
         if (text == null) {
@@ -478,10 +576,20 @@ public class PdfExporter implements ExportStrategy {
         table.addCell(cell);
     }
 
+    /**
+     * Converts a timestamp into a readable time.
+     * @param timestampMs the timestamp in milliseconds
+     * @return the formatted time
+    */
     private String formatTime(long timestampMs) {
         return TIME_FORMATTER.format(Instant.ofEpochMilli(timestampMs));
     }
 
+    /**
+     * Converts a timestamp into a readable date and time.
+     * @param timestampMs the timestamp in milliseconds
+     * @return the formatted date and time
+    */
     private String formatDateTime(long timestampMs) {
         return DATETIME_FORMATTER.format(Instant.ofEpochMilli(timestampMs));
     }

@@ -12,8 +12,19 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group22.reportnow.model.SessionSummary;
 
+/**
+ * Reads previously saved JSON reports to retrieve
+ * information about earlier ReportNow sessions.
+ */
 public class LoadPastSessions {
 
+    /**
+     * Searches report folders for previous session information.
+     * Skips the current session and sorts the results by date.
+     * @param baseDir the folder containing the saved reports
+     * @param currentSessionId the ID of the current session
+     * @return a list of previous session summaries
+    */
     public List<SessionSummary> load(File baseDir, String currentSessionId) {
         List<SessionSummary> history = new ArrayList<>();
         Set<String> seen = new HashSet<>();

@@ -9,12 +9,24 @@ import java.util.regex.Pattern;
 
 import com.group22.reportnow.model.CompileError;
 
+/**
+ * Reads compilation messages and extracts error or warning details.
+ * It stores the information as CompileError objects.
+ */
 public class ParseCompileErrors {
-
+    /**
+     * Stores the pattern used to find the filename, line number, message type and description in a compilation message.
+    */
     private static final Pattern LINE = Pattern.compile(
             "^(.+?):(\\d+):\\s*(error|warning|note):\\s*(.+)$",
             Pattern.CASE_INSENSITIVE);
 
+    /**
+     * Reads compilation messages and separates them into error details.
+     * Lines that do not match the expected format are skipped.
+     * @param rawMessage the compilation message to be checked
+     * @return a list of compilation errors and warnings found
+    */    
     public List<CompileError> parse(String rawMessage) {
         List<CompileError> result = new ArrayList<>();
         if (rawMessage ==null || rawMessage.isEmpty()) {

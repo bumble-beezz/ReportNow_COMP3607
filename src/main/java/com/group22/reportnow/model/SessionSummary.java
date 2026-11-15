@@ -3,6 +3,10 @@ package com.group22.reportnow.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Stores a summary of a ReportNow session.
+ * Contains the student, project and activity statistics used when displaying previous sessions.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SessionSummary {
 
@@ -51,9 +55,31 @@ public class SessionSummary {
     @JsonProperty("edits_per_minute")
     private double editsPerMinute;
 
+    /**
+     * Creates an empty session summary.
+     * This allows Jackson to load information from saved JSON reports.
+    */
     public SessionSummary() {
     }
 
+    /**
+     *Creates a session summary using the recorded session statistics.
+     * @param studentId the student's ID
+     * @param projectName the name of the project
+     * @param sessionId the unique ID of the session
+     * @param sessionStartMs the session start time in milliseconds
+     * @param sessionDurationMs the total session duration in milliseconds
+     * @param totalCompilations the total number of compilation attempts
+     * @param successfulCompilations the number of successful compilations
+     * @param failedCompilations the number of failed compilations
+     * @param totalExecutionAttempts the total number of execution attempts
+     * @param successfulExecutions the number of successful executions
+     * @param failedExecutions the number of failed executions
+     * @param activeTimeMs the estimated active time in milliseconds
+     * @param idleTimeMs the estimated idle time in milliseconds
+     * @param typingCadenceMs the estimated time between detected edits
+     * @param editsPerMinute the estimated number of detected edits per minute
+    */
     public SessionSummary(String studentId, String projectName, String sessionId,
                           long sessionStartMs, long sessionDurationMs,
                           int totalCompilations, int successfulCompilations, int failedCompilations,

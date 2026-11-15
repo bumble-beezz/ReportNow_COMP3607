@@ -6,7 +6,19 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 
+/**
+ * Reads saved console output and creates a summary
+ * to include in the ReportNow reports 
+ */
+
 public class ConsoleSummary {
+
+    /**
+     * Reads the console output file and counts the output lines.
+     * It shows the first 15 lines and indicates if more lines exist.
+     * @param file the file containing the saved console output
+     * @return the console summary or a message if the file cannot be read
+    */
      public String summarize(File file) {
         if (!file.exists()) {
             return "No console output saved.";

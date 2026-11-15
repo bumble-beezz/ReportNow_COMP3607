@@ -16,17 +16,36 @@ import com.group22.reportnow.model.RunEvent;
 import com.group22.reportnow.model.SessionSummary;
 import com.group22.reportnow.storage.SessionData;
 
+/**
+ * Creates JSON reports using the telemetry data collected by ReportNow
+ * It uses Jackson's ObjectMapper to save the information.
+ */
 public class JsonExporter implements ExportStrategy {
+    /** Stores the student ID used in the report */
     private final String studentId;
+    /** Stores the name of the project being reported */
     private final String projectName;
+    /** Converts the collected information into JSON format */
     private final ObjectMapper mapper;
 
+    /**
+     * Creates a JSON exporter for the given student and project.
+     * @param studentId the student's ID
+     * @param projectName the name of the BlueJ project
+    */
     public JsonExporter(String studentId, String projectName) {
         this.studentId = studentId;
         this.projectName = projectName;
         this.mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
     }
 
+
+    /**
+     * Creates a JSON report containing the recorded session information
+     * @param data the data collected during the session
+     * @param file the file where the JSON report will be saved
+     * @throws ExportException if the report cannot be generated
+    */
     @Override
     public void export(SessionData data, File file) throws ExportException {
         try {
@@ -57,7 +76,13 @@ public class JsonExporter implements ExportStrategy {
         }
     }
 
-        private Map<String, Object> buildMetadata(SessionData data) {
+
+    /**
+     * Organizes the session details and activity totals
+     * @param data the recorded session data
+     * @return a map containing the session information
+    */
+    private Map<String, Object> buildMetadata(SessionData data) {
         int totalCompiles = 0;
         int successCompiles = 0;
         int totalRuns = 0;
@@ -101,6 +126,11 @@ public class JsonExporter implements ExportStrategy {
         return m;
     }
 
+    /**
+     * Calculates the active and idle time percentages for the report
+     * @param data the recorded session data
+     * @return a map containing active and idle time information
+    */
     private Map<String, Object> buildActiveIdle(SessionData data) {
         long active = data.getActiveTimeMs();
         long idle = data.getIdleTimeMs();
@@ -127,6 +157,12 @@ public class JsonExporter implements ExportStrategy {
         return m;
     }
 
+
+    /**
+     * Counts how many times each compilation error occurred.
+     * @param data the recorded session data
+     * @return a list of errors and their frequencies
+    */
     private List<Map<String, Object>> buildErrorFrequencies(SessionData data) {
         Map<String, Integer> counts = new LinkedHashMap<>();
         for (CompileEvent ce : data.getCompileEvents()) {
@@ -146,6 +182,12 @@ public class JsonExporter implements ExportStrategy {
         return result;
     }
 
+
+    /**
+     * Organizes the compilation results for the JSON report.
+     * @param data the recorded session data
+     * @return a list containing compilation details
+    */
     private List<Map<String, Object>> buildCompilationSummary(SessionData data) {
         List<Map<String, Object>> result = new ArrayList<>();
         for (CompileEvent ce : data.getCompileEvents()) {
@@ -174,6 +216,11 @@ public class JsonExporter implements ExportStrategy {
         return result;
     }
 
+    /**
+     * Organizes the recorded class activities for the JSON report.
+     * @param data the recorded session data
+     * @return a list containing class activity information
+    */
     private List<Map<String, Object>> buildClassProgression(SessionData data) {
         List<Map<String, Object>> result = new ArrayList<>();
         for (ClassEvent ce : data.getClassEvents()) {
@@ -197,6 +244,11 @@ public class JsonExporter implements ExportStrategy {
         return result;
     }
 
+    /**
+     * Organizes the program execution results for the JSON report.
+     * @param data the recorded session data
+     * @return a list containing execution details
+    */
     private List<Map<String, Object>> buildExecutionSummary(SessionData data) {
         List<Map<String, Object>> result = new ArrayList<>();
         for (RunEvent re : data.getRunEvents()) {

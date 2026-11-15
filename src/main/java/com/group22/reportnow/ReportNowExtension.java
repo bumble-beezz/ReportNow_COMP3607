@@ -27,6 +27,10 @@ import bluej.extensions2.MenuGenerator;
 import javafx.application.Platform;
 import javafx.scene.control.MenuItem;
 
+/**
+ * Main class for the ReportNow BlueJ extension.
+ * Sets up the listeners, collects session data and allows students to export their activity reports as JSON and PDF files.
+ */
 public class ReportNowExtension extends Extension {
     private BlueJ bluej;
     private SessionData data;
@@ -39,6 +43,11 @@ public class ReportNowExtension extends Extension {
     private boolean shuttingDown = false;
     private ConsoleOutputCapture consoleCapture;
 
+    /**
+     * Starts the ReportNow extension when BlueJ loads it.
+     * Creates the session data, registers the listeners and adds the report export option to the Tools menu.
+     * @param bluej the BlueJ environment running the extension
+    */
     @Override
     public void startup(BlueJ bluej) {
         this.bluej = bluej;
@@ -81,6 +90,11 @@ public class ReportNowExtension extends Extension {
         System.out.println("[ReportNow] Session " + data.getSessionId() + " started for " + studentId);
     }
 
+    /**
+     * Stops the ReportNow extension when BlueJ closes it.
+     * Stops the timers, removes the listeners and ends the session.
+     * Also saves the final reports automatically.
+    */
     @Override
     public void terminate() {
         shuttingDown = true;
@@ -107,6 +121,11 @@ public class ReportNowExtension extends Extension {
         }
     }
 
+    /**
+     * Saves a report when a tracked project is closed.
+     * Does not export again if the extension is shutting down.
+     * @param projectName the name of the project being closed
+    */
     private void onProjectClosed(String projectName) {
         if (shuttingDown) {
             return;
@@ -115,6 +134,7 @@ public class ReportNowExtension extends Extension {
         export(dir, projectName, false);
     }
 
+    /** Opens a folder selection window so the student can choose where to save the JSON and PDF reports.*/
     private void manualExport() {
         JFileChooser chooser = new JFileChooser();
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -124,6 +144,13 @@ public class ReportNowExtension extends Extension {
         }
     }
 
+    /**
+     * Saves the session information as JSON and PDF reports.
+     * Creates the project folder, loads past sessions and attempts to save captured console output.
+     * @param baseDir the folder where the reports will be saved
+     * @param projectName the name of the project being reported
+     * @param showPopup whether to display a message after exporting
+    */
     private void export(File baseDir, String projectName, boolean showPopup) {
         if (!baseDir.exists() && !baseDir.mkdirs()) {
             System.err.println("Could not create directory: " + baseDir);

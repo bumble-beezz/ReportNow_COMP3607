@@ -17,6 +17,10 @@ import com.group22.reportnow.model.RunEvent;
 import com.group22.reportnow.model.SessionSummary;
 import com.group22.reportnow.model.TelemetryEvent;
 
+/**
+ * Stores the activity data collected during a ReportNow session.
+ * Keeps track of events, editing activity and session statistics.
+ */
 public class SessionData {
     private static final long IDLE_THRESHOLD_MS =180_000;
 

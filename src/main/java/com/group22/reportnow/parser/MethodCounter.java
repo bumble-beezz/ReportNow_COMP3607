@@ -7,9 +7,19 @@ import java.nio.file.Files;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Counts the methods found in a Java source file.
+ * This helps ReportNow check whether methods have been added or removed.
+ */
 public class MethodCounter {
+    /** Stores the pattern used to find possible method declarations.*/
     private static final Pattern METHOD = Pattern.compile("(?:(?:public|private|protected|static|final|abstract|synchronized|native|default|strictfp)\\s+)+" + "[\\w<>\\[\\],.?]+(?:\\s[\\w<>\\[\\],.?]+)*\\s+" + "\\w+\\s*\\([^)]*\\)");
 
+    /**
+     * Reads a Java file and counts method declarations using a pattern.
+     * @param javaFile the Java source file being checked
+     * @return the number of methods found, or 0 if the file cannot be read
+    */
     public int countMethods(File javaFile) {
         if (javaFile == null || !javaFile.exists()) {
             return 0;
