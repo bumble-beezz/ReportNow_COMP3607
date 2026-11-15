@@ -1,4 +1,4 @@
-////Student IDs: 816044172, 400017923
+//Student IDs: 816044172, 400017923
 
 
 package com.group22.reportnow.model;
