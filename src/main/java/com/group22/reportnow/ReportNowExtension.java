@@ -209,7 +209,7 @@ public class ReportNowExtension extends Extension {
         }
     }
 
-    /**    (non-Javadoc)
+    /** 
      * Returns the display name of the extension
      * @return the name "ReportNow Telemetry"
      */
