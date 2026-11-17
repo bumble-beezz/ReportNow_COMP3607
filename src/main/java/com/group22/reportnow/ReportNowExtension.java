@@ -32,15 +32,25 @@ import javafx.scene.control.MenuItem;
  * Sets up the listeners, collects session data and allows students to export their activity reports as JSON and PDF files.
  */
 public class ReportNowExtension extends Extension {
+    /**The BlueJ environment running the extension*/
     private BlueJ bluej;
+    /**The in-memory cache storing all telemetry events for the current session*/
     private SessionData data;
+    /**Listens for project and class lifecycle events. */
     private ProjectLifecycleListener projectListener;
+    /**Listens for compilation events*/
     private RecordCompile compileRecorder;
+    /**Listens for execution events */
     private ExecutionListener execute;
+    /**Tracks editor interactions */
     private TrackEditor editorTracker;
+    /**Background timer used to scan open editors for changes */
     private Timer editorTimer;
+    /**The unique ID of the student using the IDE */
     private String studentId;
+    /**Tracks whether the extension is shutting down to prevent extra exports */
     private boolean shuttingDown = false;
+    /**Captures output written to System.out and System.err */
     private ConsoleOutputCapture consoleCapture;
 
     /**
@@ -197,8 +207,26 @@ public class ReportNowExtension extends Extension {
         }
     }
 
+    /**    (non-Javadoc)
+     * Returns the display name of the extension
+     * @return the name "ReportNow Telemetry"
+     */
     @Override public String getName() { return "ReportNow Telemetry"; }
+
+    /**
+     * Returns the current version of the extension.
+     * @return the version string "1.0.0"
+     */
     @Override public String getVersion() { return "1.0.0"; }
+
+    /**Checks if the extension is compatible with the current BlueJ version
+     * @return true, as it is designed for the current Extensions API.
+     */
     @Override public boolean isCompatible() { return true; }
+
+    /**
+     * Returns a brief description of the extension's purpose
+     * @return a string describing the plugin
+     */
     @Override public String getDescription() { return "Collects coding telemetry and exports JSON and PDF reports."; }
 }

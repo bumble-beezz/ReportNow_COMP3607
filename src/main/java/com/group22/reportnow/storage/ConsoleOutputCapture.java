@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
  * Filters some internal messages before saving the output.
  */
 public class ConsoleOutputCapture {
+    /**Patterns used to identify and filter out internal logging messages */
     private static final Pattern[] INTERNAL_PATTERNS = {
         Pattern.compile("^\\[ReportNow\\].*"),
         Pattern.compile("^WARNING:.*"),
@@ -29,23 +30,27 @@ public class ConsoleOutputCapture {
         Pattern.compile("^\\s+at java\\.base\\..*")
     };
 
+    /**Stores the captured text before filtering */
     private final StringBuilder buffer = new StringBuilder();
+    /**Stores a reference to the original standard output stream */
     private final PrintStream originalOut;
+    /**Stores a reference to the original error output stream */
     private final PrintStream originalErr;
+    /**Stores the stream currently being used to capture output */
     private PrintStream capturingStream;
 
     /**
-     * Creates the output capture object and saves the original output and error streams.
-    */
+     *Creates the output capture object and saves the original output and error streams.
+     */
     public ConsoleOutputCapture() {
         this.originalOut = System.out;
         this.originalErr = System.err;
     }
 
     /**
-     * Starts capturing text written to System.out and System.err.
-     * The captured text is also sent to the original output stream.
-    */
+     *Starts capturing text written to System.out and System.err.
+     *The captured text is also sent to the original output stream.
+     */
     public synchronized void start() {
         if (capturingStream != null) return;
         capturingStream = new PrintStream(new TeeOutputStream(buffer, originalOut), true);
@@ -64,7 +69,7 @@ public class ConsoleOutputCapture {
     /**
      * Gets the captured output after removing matching internal messages.
      * @return the filtered output, or an empty string if none was captured
-    */
+     */
     public synchronized String getCapturedOutput() {
         String raw = buffer.toString();
         if (raw.isEmpty()) {
@@ -87,7 +92,7 @@ public class ConsoleOutputCapture {
      * Saves the filtered captured output to a text file.
      * @param file the file where the output will be saved
      * @throws IOException if the file cannot be written
-    */
+     */
     public synchronized void writeToFile(File file) throws IOException {
         try (OutputStream out = new FileOutputStream(file)) {
             out.write(getCapturedOutput().getBytes());
@@ -120,17 +125,34 @@ public class ConsoleOutputCapture {
             this.original= original;
         }
 
+        /**        (non-Javadoc)
+         * Writes a single byte to the buffer and the original stream.
+         * @param b the byte to write
+         * @throws IOException if an error occurs while writing
+         */
         @Override
         public void write(int b) throws IOException {
             buffer.append((char) b);
             original.write(b);
         }
 
+        /**        (non-Javadoc)
+         * Writes part of a byte array to the buffer and original stream
+         * @param b the byte array containing the data
+         * @param off the starting position in the array
+         * @param len the number of bytes to write
+         * @throws IOException if an error occurs while writing
+         */
         @Override
         public void write(byte[] b, int off, int len) throws IOException {
             buffer.append(new String(b, off, len));
             original.write(b, off, len);
         }
+
+        /**        (non-Javadoc)
+         * Flushes the orignal output stream
+         * @throws IOException if an error occurs while flushing
+         */
         @Override
         public void flush() throws IOException {
             original.flush();

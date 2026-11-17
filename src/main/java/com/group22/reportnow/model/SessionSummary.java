@@ -58,7 +58,7 @@ public class SessionSummary {
     /**
      * Creates an empty session summary.
      * This allows Jackson to load information from saved JSON reports.
-    */
+     */
     public SessionSummary() {
     }
 
@@ -79,7 +79,7 @@ public class SessionSummary {
      * @param idleTimeMs the estimated idle time in milliseconds
      * @param typingCadenceMs the estimated time between detected edits
      * @param editsPerMinute the estimated number of detected edits per minute
-    */
+     */
     public SessionSummary(String studentId, String projectName, String sessionId,
                           long sessionStartMs, long sessionDurationMs,
                           int totalCompilations, int successfulCompilations, int failedCompilations,
@@ -103,6 +103,10 @@ public class SessionSummary {
         this.editsPerMinute = editsPerMinute;
     }
 
+    /**
+     * Gets the name of the project
+     * @return the project name or "Unknown Project" if it is empty
+     */
     public String getProjectName() {
         if (projectName == null || projectName.isBlank()) {
             return "Unknown Project";
@@ -110,58 +114,114 @@ public class SessionSummary {
         return projectName;
     }
 
+    /**
+     * Get the student's ID
+     * @return the student ID
+     */
     public String getStudentId() {
         return studentId;
     }
 
+    /**
+     * Gets the unique ID for this session
+     * @return the session ID
+     */
     public String getSessionId() {
         return sessionId;
     }
 
+    /**
+     * Gets the time the session started
+     * @return the session start time in milliseconds
+     */
     public long getSessionStartMs() {
         return sessionStartMs;
     }
 
+    /**
+     * Gets the total duration of the session
+     * @return the session duration in milliseconds
+     */
     public long getSessionDurationMs() {
         return sessionDurationMs;
     }
 
+    /**
+     * Gets the total number of compilation attempts
+     * @return the total compilations
+     */
     public int getTotalCompilations() {
         return totalCompilations;
     }
 
+    /**
+     * Gets the sucessful compilations
+     * @return the successful compilations
+     */
     public int getSuccessfulCompilations() {
         return successfulCompilations;
     }
 
+    /**
+     * Gets the number of failed compilations
+     * @return the failed compilations
+     */
     public int getFailedCompilations() {
         return failedCompilations;
     }
 
+    /**
+     * Gets the number of execution attempts
+     * @return the total execution attempts
+     */
     public int getTotalExecutionAttempts() {
         return totalExecutionAttempts;
     }
 
+    /**
+     * Gets the number of successful executions
+     * @return the successful executions
+     */
     public int getSuccessfulExecutions() {
         return successfulExecutions;
     }
 
+    /**
+     * Gets the number of failed executions
+     * @return the failed executions
+     */
     public int getFailedExecutions() {
         return failedExecutions;
     }
 
+    /**
+     * Gets the calculated active time
+     * @return the active time in milliseconds
+     */
     public long getActiveTimeMs() {
         return activeTimeMs;
     }
 
+    /**
+     * Gets the calculated idle time
+     * @return the idle time in milliseconds
+     */
     public long getIdleTimeMs() {
         return idleTimeMs;
     }
 
+    /**
+     * Gets the calculated typing cadence
+     * @return the typing cadence in milliseconds
+     */
     public long getTypingCadenceMs() {
         return typingCadenceMs;
     }
 
+    /**
+     * Gets the calculated edits per minute
+     * @return the edits per minute
+     */
     public double getEditsPerMinute() {
         return editsPerMinute;
     }
