@@ -1,3 +1,5 @@
+//Student IDs: 400017923, 816044172
+
 package com.group22.reportnow.config;
 
 import java.io.File;
@@ -14,7 +16,6 @@ import javax.swing.JOptionPane;
  * StoreStudentId
  * Handles the student Id prompt used in ReportNow when a user opens BlueJ
  */
-
 public class StoreStudentId {
     /** Stores the student Id in the configuration properties */
     private Properties props = new Properties();
