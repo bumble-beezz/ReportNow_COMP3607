@@ -2,6 +2,7 @@
 
 package com.group22.reportnow.config;
 
+import java.awt.Image;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -78,11 +79,13 @@ public class StoreStudentId {
         ImageIcon icon = null;
 
         if (url != null) {
-            icon = new ImageIcon(url);
+            ImageIcon originalIcon = new ImageIcon(url);
+            Image smallerIcon = originalIcon.getImage().getScaledInstance(64, 64, Image.SCALE_SMOOTH);
+            icon = new ImageIcon(smallerIcon);
         }
+        
         return (String) JOptionPane.showInputDialog(null,
             "Welcome to ReportNow!\nPlease enter your Student ID:",
             "ReportNow Setup", JOptionPane.PLAIN_MESSAGE, icon, null, null);
     }
 }
-
