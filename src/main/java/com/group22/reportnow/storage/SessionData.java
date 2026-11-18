@@ -34,6 +34,10 @@ public class SessionData {
     private final long startMs;
     /**The time the session ended in milliseconds (0 if not ended)*/
     private long endMs = 0L;
+    /**The time of the first user action in milliseconds (0 if none yet)*/
+    private long firstActivityMs = 0L;
+    /**List of timestamps of every user action (edits, compiles, runs, class and project changes)*/
+    private final List<Long> activityTimes = new ArrayList<>();
     /**List of all telemetry events recorded during the session*/
     private final List<TelemetryEvent> events = new ArrayList<>();
     /**List of timestamps when editor text changes were detected*/
@@ -51,12 +55,28 @@ public class SessionData {
     }
 
     /**
+     * Remembers the time of the first user action.
+     * Later actions do not change it.
+     * @param whenMs the time of the action in milliseconds
+     */
+    private void markActivity(long whenMs) {
+        activityTimes.add(whenMs);
+        if (firstActivityMs == 0L) {
+            firstActivityMs = whenMs;
+        }
+    }
+
+    /**
      * Records a project activity event
      * @param action the project action
      * @param projectName the name of the project
      */
     public synchronized void recordProject(String action, String projectName) {
-        events.add(new ProjectEvent(System.currentTimeMillis(),action,projectName));
+        long now = System.currentTimeMillis();
+        events.add(new ProjectEvent(now,action,projectName));
+        if (!"ProjectOpened".equals(action)) {
+            markActivity(now);
+        }
     }
 
     /**
@@ -66,7 +86,9 @@ public class SessionData {
      * @param projectName the name of the project
      */
     public synchronized void recordClass(String action, String className,String projectName) {
-        events.add(new ClassEvent(System.currentTimeMillis(), action,className, projectName));
+        long now = System.currentTimeMillis();
+        events.add(new ClassEvent(now, action,className, projectName));
+        markActivity(now);
     }
 
     /**
@@ -77,7 +99,9 @@ public class SessionData {
      * @param errors the list of compilation errors
      */
     public synchronized void recordCompile(String projectName, boolean success,long durationMs, List<CompileError> errors) {
-        events.add(new CompileEvent(System.currentTimeMillis(), projectName,success, durationMs,errors));
+        long now = System.currentTimeMillis();
+        events.add(new CompileEvent(now, projectName,success, durationMs,errors));
+        markActivity(now);
     }
 
     /**
@@ -88,7 +112,9 @@ public class SessionData {
      * @param message any runtime message or exception information
      */
     public synchronized void recordRun(String projectName,boolean success, long durationMs, String message) {
-        events.add(new RunEvent(System.currentTimeMillis(), projectName, success, durationMs, message));
+        long now = System.currentTimeMillis();
+        events.add(new RunEvent(now, projectName, success, durationMs, message));
+        markActivity(now);
     }
 
     /**
@@ -97,6 +123,7 @@ public class SessionData {
      */
     public synchronized void recordEdit(Instant when) {
         editTimes.add(when);
+        markActivity(when.toEpochMilli());
     }
 
     /**
@@ -241,16 +268,14 @@ public class SessionData {
 
     
     /**
-     * Calculates the estimated active time using detected edits.
-     * If no active editing time is founc, compilation and execution durations are used instead.
+     * Calculates the estimated active time.
+     * Uses the largest of: time between user actions (gaps under three minutes),
+     * time between detected edits, and compilation and execution durations.
      * @return the estimated active time in milliseconds
      */
     public synchronized long getActiveTimeMs() {
+        long fromActivity = getActiveTimeFromActivityMs();
         long fromEdits = getActiveTimeFromEditsMs();
-
-        if (fromEdits > 0) {
-            return fromEdits;
-        }
 
         long total = 0L;
 
@@ -262,7 +287,7 @@ public class SessionData {
             }
         }
 
-        return total;   
+        return Math.max(fromActivity, Math.max(fromEdits, total));
     }
 
     /**
@@ -291,6 +316,32 @@ public class SessionData {
     }
 
     /**
+     * Calculates active time using gaps between any two consecutive user actions
+     * (edits, compiles, runs, class and project changes) that are shorter than three minutes
+     * @return the estimated active time in milliseconds
+     */
+    public synchronized long getActiveTimeFromActivityMs() {
+        if (activityTimes.size() < 2) {
+            return 0L;
+        }
+
+        List<Long> sorted = new ArrayList<>(activityTimes);
+        Collections.sort(sorted);
+
+        long total = 0L;
+
+        for (int i = 1; i < sorted.size(); i++) {
+            long gap = sorted.get(i) - sorted.get(i - 1);
+
+            if (gap >= 0 && gap < IDLE_THRESHOLD_MS) {
+                total += gap;
+            }
+        }
+
+        return total;
+    }
+
+    /**
      * Gets the total duration of the session
      * @return the session duration in milliseconds
      */
@@ -302,16 +353,24 @@ public class SessionData {
     }
 
     /**
-     * Calculates the estimated idle time by subtracting active time from the total session duration
+     * Gets the time from the first user action to the end of the session (or now).
+     * @return the tracked duration in milliseconds, or 0 if no action has happened
+     */
+    public synchronized long getTrackedDurationMs() {
+        if (firstActivityMs == 0L) {
+            return 0L;
+        }
+        long end = (endMs > 0) ? endMs : System.currentTimeMillis();
+        return Math.max(0L, end - firstActivityMs);
+    }
+
+    /**
+     * Calculates the estimated idle time by subtracting active time from the time since the first user action
      * @return the estimated idle time in milliseconds
      */
     public synchronized long getIdleTimeMs() {
-        long duration = getSessionDurationMs();
-        long active = getActiveTimeMs();
-        long idle = duration - active;
-        if (idle < 0) {
-            return 0L;
-        } return idle;
+        long idle = getTrackedDurationMs() - getActiveTimeMs();
+        return Math.max(0L, idle);
     }
 
     /**
@@ -363,5 +422,13 @@ public class SessionData {
      */
     public long getStartMs() {
         return startMs;
+    }
+
+    /**
+     * Gets the time of the first user action in milliseconds
+     * @return the first activity time, or 0 if no action has happened
+     */
+    public synchronized long getFirstActivityMs() {
+        return firstActivityMs;
     }
 }

@@ -136,4 +136,68 @@ public class SessionDataTest {
         fresh.endSession();
         assertEquals(0.0, fresh.getEditsPerMinute(), 0.001);
     }
+
+    @Test
+    void noActivityMeansNoTrackedTime() throws InterruptedException {
+        Thread.sleep(40);
+        data.endSession();
+        assertEquals(0L, data.getFirstActivityMs());
+        assertEquals(0L, data.getTrackedDurationMs());
+        assertEquals(0L, data.getIdleTimeMs());
+    }
+
+    @Test
+    void projectOpenedDoesNotStartTracking() {
+        data.recordProject("ProjectOpened", "P");
+        assertEquals(0L, data.getFirstActivityMs());
+    }
+
+    @Test
+    void projectCreatedStartsTracking() {
+        data.recordProject("ProjectCreated", "P");
+        assertTrue(data.getFirstActivityMs() > 0);
+    }
+
+    @Test
+    void classEventStartsTracking() {
+        data.recordClass("ClassCreated", "A.java", "P");
+        assertTrue(data.getFirstActivityMs() > 0);
+    }
+
+    @Test
+    void editStartsTrackingAtEditTime() {
+        long base = System.currentTimeMillis();
+        data.recordEdit(Instant.ofEpochMilli(base));
+        assertEquals(base, data.getFirstActivityMs());
+    }
+
+    @Test
+    void firstActivityTimeDoesNotChange() throws InterruptedException {
+        data.recordClass("ClassCreated", "A.java", "P");
+        long first = data.getFirstActivityMs();
+        Thread.sleep(5);
+        data.recordCompile("P", true, 0, new ArrayList<>());
+        assertEquals(first, data.getFirstActivityMs());
+    }
+
+    @Test
+    void activityGapsCountAsActiveTime() throws InterruptedException {
+        data.recordClass("ClassCreated", "A.java", "P");
+        Thread.sleep(200);
+        data.recordCompile("P", true, 0, new ArrayList<>());
+        Thread.sleep(200);
+        data.recordRun("P", true, 0, null);
+        assertTrue(data.getActiveTimeFromActivityMs() >= 350);
+        assertTrue(data.getActiveTimeMs() >= 350);
+    }
+
+    @Test
+    void idleTimeExcludesTimeBeforeFirstAction() throws InterruptedException {
+        Thread.sleep(100);
+        data.recordClass("ClassCreated", "A.java", "P");
+        Thread.sleep(50);
+        data.endSession();
+        assertTrue(data.getIdleTimeMs() < data.getSessionDurationMs());
+        assertTrue(data.getTrackedDurationMs() < data.getSessionDurationMs());
+    }
 }
