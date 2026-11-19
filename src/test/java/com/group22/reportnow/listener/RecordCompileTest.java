@@ -123,4 +123,31 @@ public class RecordCompileTest {
         assertEquals(1, ce.getErrors().size());
         assertEquals("unknown", ce.getErrors().get(0).getFileName());
     }
+
+    @Test
+    void handlesNullFileArrayGracefully() {
+        bluej.extensions2.event.CompileEvent e =
+                mock(bluej.extensions2.event.CompileEvent.class);
+        when(e.getFiles()).thenReturn(null);
+        when(e.getErrorMessage()).thenReturn("generic error");
+        when(e.getErrorLineNumber()).thenReturn(7);
+
+        recorder.compileStarted(mock(bluej.extensions2.event.CompileEvent.class));
+        recorder.compileError(e);
+        recorder.compileFailed(mock(bluej.extensions2.event.CompileEvent.class));
+
+        CompileEvent ce = data.getCompileEvents().get(0);
+        assertEquals("unknown", ce.getErrors().get(0).getFileName());
+        assertEquals(7, ce.getErrors().get(0).getLineNumber());
+    }
+
+    @Test
+    void failedCompileWithNoMessagesHasEmptyErrorList() {
+        recorder.compileStarted(mock(bluej.extensions2.event.CompileEvent.class));
+        recorder.compileFailed(mock(bluej.extensions2.event.CompileEvent.class));
+
+        CompileEvent ce = data.getCompileEvents().get(0);
+        assertFalse(ce.isSuccess());
+        assertTrue(ce.getErrors().isEmpty());
+    }
 }
